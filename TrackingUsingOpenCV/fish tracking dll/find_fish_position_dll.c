@@ -29,7 +29,10 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	tx=0;
 	ty=0;
-	
+
+
+	ROI_width=LVWidth;
+	ROI_height=LVHeight;
 
 
 	//double total_t;
@@ -53,7 +56,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	cvZero(TempImage2);
 
 
-
+	//for some unknown reason the input centroid_in->x and centroid_in->y were swapped 
 
 	if (setROI) {
 
@@ -61,11 +64,11 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 		CvRect ROI;
 
 
-		tx = ((centroid_in->x-width/2) > 0) ? centroid_in->x-width/2 : 0;
-		ty = ((centroid_in->y-height/2) > 0) ? centroid_in->y-width/2 : 0;
+		tx = ((centroid_in->y-width/2) > 0) ? centroid_in->y-width/2 : 0;
+		ty = ((centroid_in->x-height/2) > 0) ? centroid_in->x-height/2 : 0;
 
-		ROI_width = ((centroid_in->x+width/2) < LVWidth) ? width : (LVWidth-centroid_in->x)*2;
-		ROI_height = ((centroid_in->y+height/2) < LVHeight) ? height : (LVHeight-centroid_in->y)*2;
+		ROI_width = ((centroid_in->y+width/2) < LVWidth) ? width : (LVWidth-centroid_in->y-10)*2;
+		ROI_height = ((centroid_in->x+height/2) < LVHeight) ? height : (LVHeight-centroid_in->x-10)*2;
 
 
 		ROI = cvRect(tx,ty,ROI_width,ROI_height);
@@ -110,7 +113,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	double min,max;
 	CvPoint* maxLoc = (CvPoint*) malloc(sizeof(CvPoint));
-	*maxLoc=cvPoint(centroid_in->x,centroid_in->y);
+	
 	cvMinMaxLoc(TempImage,&min,&max,NULL,maxLoc,NULL);
 		
 	
@@ -127,6 +130,24 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	
 
 	/** Find Contours and use contours to find fish center**/
+
+	if (shift==0){
+
+		centroid_out->y=maxLoc->x+tx;
+		centroid_out->x=maxLoc->y+ty;
+
+		if (setROI){
+
+			cvResetImageROI(CVImageDst);
+			cvResetImageROI(CVImageSrc);
+		}
+		
+		cvReleaseImage(&TempImage2);
+		return 0;
+
+	}
+
+
 	
 
 	CvSeq* contours;
@@ -145,9 +166,9 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	else{
 
-	 	centroid_out->x=maxLoc->x+tx;
-		centroid_out->y=maxLoc->y+ty;
-		return 1;
+	 	centroid_out->x=maxLoc->y+tx;
+		centroid_out->y=maxLoc->x+ty;
+		return 10;
 	}
 
 	
@@ -167,19 +188,22 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 		sum_y+=Pt->y;
 	}
 
-	Fish_Center->x=sum_x/TotalBpts;
-	Fish_Center->y=sum_y/TotalBpts;
+	Fish_Center->x=sum_y/TotalBpts;
+	Fish_Center->y=sum_x/TotalBpts;
 
 	
 
-	D = (int) sqrt (pow(Fish_Center->x - maxLoc->x,2) + pow(Fish_Center->y - maxLoc->y,2) );
-	centroid_out->x = shift*(Fish_Center->x - maxLoc->x)/D + maxLoc->x;
-	centroid_out->y = shift*(Fish_Center->y - maxLoc->y)/D + maxLoc->y; 
+	D = (int) sqrt (pow(Fish_Center->x - maxLoc->y,2) + pow(Fish_Center->y - maxLoc->x,2) );
+	centroid_out->x = shift*(Fish_Center->x - maxLoc->y)/D + maxLoc->y + ty;
+	centroid_out->y = shift*(Fish_Center->y - maxLoc->x)/D + maxLoc->x + tx; 
 
 	
 
-	centroid_out->x = centroid_out->x + tx;
-	centroid_out->y = centroid_out->y + ty;
+	//centroid_out->x = centroid_out->x + ty;
+	//centroid_out->y = centroid_out->y + tx;
+
+	//centroid_out->x = Fish_Center->y + tx;
+	//centroid_out->y = Fish_Center->x + ty;
 
 	
 	//free(Pt);
@@ -188,6 +212,12 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	cvReleaseImage(&TempImage2);
 	cvReleaseMemStorage(&MemStorage);
+
+	if (setROI){
+			
+			cvResetImageROI(CVImageDst);
+			cvResetImageROI(CVImageSrc);
+		}
 
 
 
