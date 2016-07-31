@@ -131,21 +131,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	/** Find Contours and use contours to find fish center**/
 
-	if (shift==0){
-
-		centroid_out->y=maxLoc->x+tx;
-		centroid_out->x=maxLoc->y+ty;
-
-		if (setROI){
-
-			cvResetImageROI(CVImageDst);
-			cvResetImageROI(CVImageSrc);
-		}
-		
-		cvReleaseImage(&TempImage2);
-		return 0;
-
-	}
+	
 
 
 	
@@ -162,40 +148,86 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	CvSeq* rough;
 	/** Find Longest Contour **/
-	if (contours) LongestContour(contours,&rough);
+	if (contours){
+
+		LongestContour(contours,&rough);
+	}
+
+		
+	else{
+
+	 	centroid_out->x=centroid_in->x+ty;
+		centroid_out->y=centroid_in->y+tx;
+		cvReleaseImage(&TempImage2);
+		cvReleaseMemStorage(&MemStorage);
+		return 0;
+	}
+
+
+
+	//if (shift==0){
+
+	//	centroid_out->y=maxLoc->x+tx;
+	//	centroid_out->x=maxLoc->y+ty;
+
+	//	if (setROI){
+
+	//		cvResetImageROI(CVImageDst);
+	//		cvResetImageROI(CVImageSrc);
+	//	}
+		
+	//	cvReleaseImage(&TempImage2);
+	//	cvReleaseMemStorage(&MemStorage);
+	//	return 0;
+
+//	}
+
+
+	float centerline_Param[4];
+
+	cvFitLine(rough, CV_DIST_L2,0,0.01,0.01,centerline_Param);
+
+	if (centerline_Param[0]>=0){
+
+		centroid_out->x = maxLoc->y + shift*centerline_Param[1] + ty;
+		centroid_out->y = maxLoc->x + shift*centerline_Param[0] + tx;
+
+	}
 
 	else{
 
-	 	centroid_out->x=maxLoc->y+tx;
-		centroid_out->y=maxLoc->x+ty;
-		return 10;
+		centroid_out->x = maxLoc->y - shift*centerline_Param[1] + ty;
+		centroid_out->y = maxLoc->x - shift*centerline_Param[0] + tx;
+
 	}
 
-	
-	int TotalBpts;
-	int i;
-	int sum_x=0;
-	int sum_y=0;
-	int D;
 
-	CvPoint* Pt = (CvPoint*) malloc(sizeof(CvPoint));
-	TotalBpts = rough->total;
+
+	
+	//int TotalBpts;
+	//int i;
+	//int sum_x=0;
+	//int sum_y=0;
+	//int D;
+
+	//CvPoint* Pt = (CvPoint*) malloc(sizeof(CvPoint));
+	//TotalBpts = rough->total;
 		
-	for (i=0; i<TotalBpts; i++) {
+	//for (i=0; i<TotalBpts; i++) {
 			
-		Pt = (CvPoint*)cvGetSeqElem(rough,i);
-		sum_x+=Pt->x;
-		sum_y+=Pt->y;
-	}
+	//	Pt = (CvPoint*)cvGetSeqElem(rough,i);
+	//	sum_x+=Pt->x;
+	//	sum_y+=Pt->y;
+	//}
 
-	Fish_Center->x=sum_y/TotalBpts;
-	Fish_Center->y=sum_x/TotalBpts;
+	//Fish_Center->x=sum_y/TotalBpts;
+	//Fish_Center->y=sum_x/TotalBpts;
 
 	
 
-	D = (int) sqrt (pow(Fish_Center->x - maxLoc->y,2) + pow(Fish_Center->y - maxLoc->x,2) );
-	centroid_out->x = shift*(Fish_Center->x - maxLoc->y)/D + maxLoc->y + ty;
-	centroid_out->y = shift*(Fish_Center->y - maxLoc->x)/D + maxLoc->x + tx; 
+	//D = (int) sqrt (pow(Fish_Center->x - maxLoc->y,2) + pow(Fish_Center->y - maxLoc->x,2) );
+	//centroid_out->x = shift*(Fish_Center->x - maxLoc->y)/D + maxLoc->y + ty;
+	//centroid_out->y = shift*(Fish_Center->y - maxLoc->x)/D + maxLoc->x + tx; 
 
 	
 
