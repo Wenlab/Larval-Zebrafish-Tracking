@@ -55,6 +55,13 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	cvZero(TempImage);
 	cvZero(TempImage2);
 
+	if ((centroid_in->y >= LVWidth) || (centroid_in->x >= LVHeight)){
+
+		setROI = FALSE;
+	}
+
+		
+
 
 	//for some unknown reason the input centroid_in->x and centroid_in->y were swapped 
 
@@ -67,11 +74,23 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 		tx = ((centroid_in->y-width/2) > 0) ? centroid_in->y-width/2 : 0;
 		ty = ((centroid_in->x-height/2) > 0) ? centroid_in->x-height/2 : 0;
 
-		ROI_width = ((centroid_in->y+width/2) < LVWidth) ? width : (LVWidth-centroid_in->y-10)*2;
-		ROI_height = ((centroid_in->x+height/2) < LVHeight) ? height : (LVHeight-centroid_in->x-10)*2;
+		ROI_width = ((centroid_in->y+width/2) < LVWidth) ? width : LVWidth-centroid_in->y-1+width/2;
+		ROI_height = ((centroid_in->x+height/2) < LVHeight) ? height : LVHeight-centroid_in->x-1+height/2;
+
+		if ((tx+ROI_width > LVWidth) || (ty+ROI_height > LVHeight)){
+
+			tx = 0;
+			ty = 0;
+			ROI = cvRect (0,0,LVWidth,LVHeight);
+		}
 
 
-		ROI = cvRect(tx,ty,ROI_width,ROI_height);
+		else{
+
+			ROI = cvRect(tx,ty,ROI_width,ROI_height);
+
+		}
+
 
 		cvSetImageROI(CVImageSrc,ROI);
 		cvSetImageROI(CVImageDst,ROI);
@@ -131,13 +150,9 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	/** Find Contours and use contours to find fish center**/
 
-	
-
-
-	
 
 	CvSeq* contours;
-	CvPoint* Fish_Center = (CvPoint*) malloc(sizeof(CvPoint));
+	
 	
 	cvCopy(CVImageDst,TempImage2);
 
@@ -153,6 +168,8 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 		LongestContour(contours,&rough);
 	}
 
+/** for some unknown reason, labview output centroid x and y are swapped **/
+
 		
 	else{
 
@@ -164,99 +181,190 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	}
 
 
+/** for some unknown reason, labview output centroid x and y are swapped **/
 
-	//if (shift==0){
+	if (shift==0){
 
-	//	centroid_out->y=maxLoc->x+tx;
-	//	centroid_out->x=maxLoc->y+ty;
+		centroid_out->y=maxLoc->x+tx;
+		centroid_out->x=maxLoc->y+ty;
 
-	//	if (setROI){
+		if (setROI){
 
-	//		cvResetImageROI(CVImageDst);
-	//		cvResetImageROI(CVImageSrc);
-	//	}
+			cvResetImageROI(CVImageDst);
+			cvResetImageROI(CVImageSrc);
+		}
 		
-	//	cvReleaseImage(&TempImage2);
-	//	cvReleaseMemStorage(&MemStorage);
-	//	return 0;
+		cvReleaseImage(&TempImage2);
+		cvReleaseMemStorage(&MemStorage);
+		return 0;
 
-//	}
+	}
 
+
+/** if shift is not zero, a small compensation needs to be calculated **/
+
+
+/** Calculate the centerline, tail, nose, midpoint of the fish **/
 
 	float centerline_Param[4];
+	float vx,vy,x0,y0;
 
 	cvFitLine(rough, CV_DIST_L2,0,0.01,0.01,centerline_Param);
 
-	if (centerline_Param[0]>=0){
+	vx = centerline_Param[0];
+	vy = centerline_Param[1];
+	x0 = centerline_Param[2];
+	y0 = centerline_Param[3];
 
-		centroid_out->x = maxLoc->y + shift*centerline_Param[1] + ty;
-		centroid_out->y = maxLoc->x + shift*centerline_Param[0] + tx;
+
+
+	
+	
+	int 	TotalBpts;
+	int 	i;
+	float 	dtemp,D;
+	float 	dmin1 = 3000;
+	float 	dmin2 = 3000;
+	float 	ux, uy, x1, y1;
+	int   	idx1, idx2;
+
+
+	CvPoint* Pt = (CvPoint*) malloc(sizeof(CvPoint));
+	CvPoint* extreme_Pt1 = (CvPoint*) malloc(sizeof(CvPoint));
+	CvPoint* extreme_Pt2 = (CvPoint*) malloc(sizeof(CvPoint));
+	CvPoint* Midpoint = (CvPoint*) malloc(sizeof(CvPoint));
+
+	TotalBpts = rough->total;
+
+	 /* find point on the contour that is closest to the centerline */
+		
+	for (i=0; i<TotalBpts; i++) {
+			
+		Pt = (CvPoint*)cvGetSeqElem(rough,i);
+		x1 = Pt->x - x0; 
+		y1 = Pt->y - y0;
+		D = sqrt(x1*x1+y1*y1);
+		ux = x1/D;
+		uy = y1/D;
+		dtemp = abs(ux*vy-uy*vx); //cross product between two normalized vector
+
+		if (dtemp < dmin1){
+			dmin1 = dtemp;
+			idx1 = i;
+
+		}
+		
+		
+	}
+
+
+
+
+
+	/* find the second point on the contour that is closest to the centerline */
+
+	for (i=idx1+TotalBpts/4; i<TotalBpts; i++){
+
+		Pt = (CvPoint*)cvGetSeqElem(rough,i);
+		x1 = Pt->x - x0; 
+		y1 = Pt->y - y0;
+		D = sqrt(x1*x1+y1*y1);
+		ux = x1/D;
+		uy = y1/D;
+		dtemp = abs(ux*vy-uy*vx); //cross product between two normalized vectors
+
+		if (dtemp < dmin2){
+			dmin2 = dtemp;
+			idx2 = i;
+
+		}
+
+
+	}
+
+	for (i=0; i<idx1-TotalBpts/4; i++){
+
+		Pt = (CvPoint*)cvGetSeqElem(rough,i);
+		x1 = Pt->x - x0; 
+		y1 = Pt->y - y0;
+		D = sqrt(x1*x1+y1*y1);
+		ux = x1/D;
+		uy = y1/D;
+		dtemp = abs(ux*vy-uy*vx); //cross product between two normalized vectors
+
+		if (dtemp < dmin2){
+			dmin2 = dtemp;
+			idx2 = i;
+
+		}
+
+
+	}
+
+
+
+	/* determine the midpoint of the centerline  */
+
+	extreme_Pt1 = (CvPoint*)cvGetSeqElem(rough,idx1);
+	extreme_Pt2 = (CvPoint*)cvGetSeqElem(rough,idx2);
+
+	Midpoint->x = (extreme_Pt1->x + extreme_Pt2->x)/2;
+	Midpoint->y = (extreme_Pt1->y + extreme_Pt2->y)/2;
+
+
+
+	/** for some unknown reason, labview output centroid x and y are swapped **/
+
+
+	if (Midpoint->x >= maxLoc->x) {
+
+		centroid_out->x = maxLoc->y + shift*vy + ty;
+		centroid_out->y = maxLoc->x + shift*vx + tx;
 
 	}
 
 	else{
 
-		centroid_out->x = maxLoc->y - shift*centerline_Param[1] + ty;
-		centroid_out->y = maxLoc->x - shift*centerline_Param[0] + tx;
+		centroid_out->x = maxLoc->y - shift*vy + ty;
+		centroid_out->y = maxLoc->x - shift*vx + tx;
 
 	}
 
 
+	//centroid_out->x = Midpoint->y + ty;
+	//centroid_out->y = Midpoint->x + tx;
 
-	
-	//int TotalBpts;
-	//int i;
-	//int sum_x=0;
-	//int sum_y=0;
-	//int D;
 
-	//CvPoint* Pt = (CvPoint*) malloc(sizeof(CvPoint));
-	//TotalBpts = rough->total;
-		
-	//for (i=0; i<TotalBpts; i++) {
-			
-	//	Pt = (CvPoint*)cvGetSeqElem(rough,i);
-	//	sum_x+=Pt->x;
-	//	sum_y+=Pt->y;
-	//}
-
-	//Fish_Center->x=sum_y/TotalBpts;
-	//Fish_Center->y=sum_x/TotalBpts;
-
-	
-
-	//D = (int) sqrt (pow(Fish_Center->x - maxLoc->y,2) + pow(Fish_Center->y - maxLoc->x,2) );
-	//centroid_out->x = shift*(Fish_Center->x - maxLoc->y)/D + maxLoc->y + ty;
-	//centroid_out->y = shift*(Fish_Center->y - maxLoc->x)/D + maxLoc->x + tx; 
-
-	
-
-	//centroid_out->x = centroid_out->x + ty;
-	//centroid_out->y = centroid_out->y + tx;
-
-	//centroid_out->x = Fish_Center->y + tx;
-	//centroid_out->y = Fish_Center->x + ty;
-
-	
 	//free(Pt);
-	//free(maxLoc);
-	//free(Fish_Center);
+	//free(extreme_Pt1);
+	//free(extreme_Pt2);
+	//free(Midpoint);
 
 	cvReleaseImage(&TempImage2);
 	cvReleaseMemStorage(&MemStorage);
 
+
+
+
+
+
+
 	if (setROI){
 			
-			cvResetImageROI(CVImageDst);
-			cvResetImageROI(CVImageSrc);
-		}
+		cvResetImageROI(CVImageDst);
+		cvResetImageROI(CVImageSrc);
+	}
 
 
 
 	return 0;
 
-
 }
+
+
+
+
+
 
 
 void LongestContour(CvSeq* contours, CvSeq** ContourOfInterest){
