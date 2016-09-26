@@ -219,10 +219,9 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	
 	int 	TotalBpts;
 	int 	i;
-	float 	dtemp,D;
+	float 	dtemp;
 	float 	dmin1 = 3000;
 	float 	dmin2 = 3000;
-	float 	ux, uy, x1, y1;
 	int   	idx1, idx2;
 
 
