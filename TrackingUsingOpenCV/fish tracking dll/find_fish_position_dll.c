@@ -211,10 +211,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	cvFitLine(rough, CV_DIST_L2,0,0.01,0.01,centerline_Param);
 
-	vx = centerline_Param[0];
-	vy = centerline_Param[1];
-	x0 = centerline_Param[2];
-	y0 = centerline_Param[3];
+	
 
 
 
@@ -241,12 +238,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	for (i=0; i<TotalBpts; i++) {
 			
 		Pt = (CvPoint*)cvGetSeqElem(rough,i);
-		x1 = Pt->x - x0; 
-		y1 = Pt->y - y0;
-		D = sqrt(x1*x1+y1*y1);
-		ux = x1/D;
-		uy = y1/D;
-		dtemp = abs(ux*vy-uy*vx); //cross product between two normalized vector
+		dtemp = GetdistFromCenterline(*Pt, centerline_Param); //calculate the distance between the boundary point and centerline
 
 		if (dtemp < dmin1){
 			dmin1 = dtemp;
@@ -266,12 +258,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	for (i=idx1+TotalBpts/4; i<TotalBpts; i++){
 
 		Pt = (CvPoint*)cvGetSeqElem(rough,i);
-		x1 = Pt->x - x0; 
-		y1 = Pt->y - y0;
-		D = sqrt(x1*x1+y1*y1);
-		ux = x1/D;
-		uy = y1/D;
-		dtemp = abs(ux*vy-uy*vx); //cross product between two normalized vectors
+		dtemp = GetdistFromCenterline(*Pt, centerline_Param); //calculate the distance between the boundary point and centerline
 
 		if (dtemp < dmin2){
 			dmin2 = dtemp;
@@ -285,12 +272,7 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 	for (i=0; i<idx1-TotalBpts/4; i++){
 
 		Pt = (CvPoint*)cvGetSeqElem(rough,i);
-		x1 = Pt->x - x0; 
-		y1 = Pt->y - y0;
-		D = sqrt(x1*x1+y1*y1);
-		ux = x1/D;
-		uy = y1/D;
-		dtemp = abs(ux*vy-uy*vx); //cross product between two normalized vectors
+		dtemp = GetdistFromCenterline(*Pt, centerline_Param); //calculate the distance between the boundary point and centerline
 
 		if (dtemp < dmin2){
 			dmin2 = dtemp;
@@ -395,4 +377,28 @@ int Max(int a, int b){
 
 		return b;
 	
+}
+
+
+float GetdistFromCenterline(CvPoint Pt, float centerline_Param[4]){
+
+	float vx,vy,x0,y0,ux,uy,dot,D;
+	int x1,y1;
+
+	vx = centerline_Param[0];
+	vy = centerline_Param[1];
+	x0 = centerline_Param[2];
+	y0 = centerline_Param[3];
+
+
+	x1 = Pt.x - x0; 
+	y1 = Pt.y - y0;
+	D = sqrt(x1*x1+y1*y1);
+	ux = x1/D;
+	uy = y1/D;
+	dot = ux*vx+uy*vy;
+	return D*sqrt(1-dot*dot);
+
+
+
 }

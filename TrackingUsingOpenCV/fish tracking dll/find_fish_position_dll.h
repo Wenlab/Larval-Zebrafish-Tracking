@@ -17,8 +17,8 @@
 #define FIND_FISH_POSITION_DLL __declspec(dllimport)
 #endif
 
-#define NSIZEX 1040
-#define NSIZEY 768
+//#define NSIZEX 1040
+//#define NSIZEY 768
 
 
 int FIND_FISH_POSITION_DLL find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
@@ -31,6 +31,8 @@ int FIND_FISH_POSITION_DLL find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc
 void LongestContour(CvSeq* contours, CvSeq** ContourOfInterest);
 
 int Max(int a, int b);
+
+float GetdistFromCenterline(CvPoint Pt, float centerline_Param[4]);
 
 
 #ifdef __cplusplus
