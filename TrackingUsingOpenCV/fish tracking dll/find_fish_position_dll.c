@@ -211,9 +211,10 @@ int find_centroid(char* LVImagePtrSrc, int LVLineWidthSrc,
 
 	cvFitLine(rough, CV_DIST_L2,0,0.01,0.01,centerline_Param);
 
-	
-
-
+	vx = centerline_Param[0];
+	vy = centerline_Param[1];
+	x0 = centerline_Param[2];
+	y0 = centerline_Param[3];
 
 	
 	
