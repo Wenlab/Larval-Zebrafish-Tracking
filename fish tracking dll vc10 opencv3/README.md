@@ -1,45 +1,14 @@
+Pipeline
+----------
+1. subtract background
+2. threshold and morphological operation
+3. find contours
+4. select the closest contour to the fish centroid in last frame, and set ROI
+5. find the centroid by distance transform
+6. find the heading direction by fitting line
 
-
-========================================================================
-    DYNAMIC LINK LIBRARY : 
-    all files for tracking larvae with OpenCV.
-    
-    find_fish_position_dll Project Overview
-========================================================================
-
-AppWizard has created this find_fish_position_dll DLL for you.
-
-This file contains a summary of what you will find in each of the files that
-make up your find_fish_position_dll application.
-
-
-find_fish_position_dll.vcxproj
-    This is the main project file for VC++ projects generated using an Application Wizard.
-    It contains information about the version of Visual C++ that generated the file, and
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
-
-find_fish_position_dll.vcxproj.filters
-    This is the filters file for VC++ projects generated using an Application Wizard. 
-    It contains information about the association between the files in your project 
-    and the filters. This association is used in the IDE to show grouping of files with
-    similar extensions under a specific node (for e.g. ".cpp" files are associated with the
-    "Source Files" filter).
-
-find_fish_position_dll.cpp
-    This is the main DLL source file.
-
-/////////////////////////////////////////////////////////////////////////////
-Other standard files:
-
-StdAfx.h, StdAfx.cpp
-    These files are used to build a precompiled header (PCH) file
-    named find_fish_position_dll.pch and a precompiled types file named StdAfx.obj.
-
-/////////////////////////////////////////////////////////////////////////////
-Other notes:
-
-AppWizard uses "TODO:" comments to indicate parts of the source code you
-should add to or customize.
-
-/////////////////////////////////////////////////////////////////////////////
+Notes
+----------
+1. Initial stage position should be the center to avoid index out of bounds while background sbutraction. Or we can creat a large enough initial global background.
+2. To achieve high fps, we can downsample the source images by changing the parameters of the camera and the vi. Elapsed time is about 2~3ms at resolution 520*384.
+3. To achieve higher fps, we could record the images rather than avi.
