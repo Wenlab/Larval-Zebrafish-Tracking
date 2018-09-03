@@ -39,10 +39,8 @@ FIND_FISH_POSITION_DLL_API int find_centroid(char* LVImagePtrSrc, int LVLineWidt
  // 
  //   QueryPerformanceCounter(&timeStart);  
 
-//to be deleted
 	Point stage_position;
 	stage_position = *position;
-	stage_position.x = -stage_position.x;
 
 
 
@@ -87,7 +85,7 @@ FIND_FISH_POSITION_DLL_API int find_centroid(char* LVImagePtrSrc, int LVLineWidt
 	//transform_coordination(position, BkgWidth, BkgHeight, scale_x, scale_y, theta);
 	//crop_background(Bkg_global, Bkg, position,
 	//	LVWidth, LVHeight);
-//to be deleted
+
 	transform_coordination(&stage_position, BkgWidth, BkgHeight, scale_x, scale_y, theta);
 	crop_background(Bkg_global, Bkg, &stage_position,
 		LVWidth, LVHeight);
