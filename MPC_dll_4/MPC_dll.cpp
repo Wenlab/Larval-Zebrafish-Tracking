@@ -56,19 +56,19 @@ MPC_DLL_API int MPC_dll(int m, int predict_length, int fish_history_length,
 	//}
 	//output << "----------------------" << endl;
 	//display some results
-	//ofstream output_command, output_stage_position, output_fish_tr, output_fish_direction;
-	////output_command.open("E:\\output_command.txt", ios::out|ios::app);
-	//output_stage_position.open("E:\\output_stage_position.txt", ios::out|ios::app);
-	//output_fish_tr.open("E:\\output_fish_tr.txt", ios::out|ios::app);
-	//output_fish_direction.open("E:\\output_fish_direction.txt", ios::out|ios::app);
-	////output_command << command_history_array[2*m] << ", " << command_history_array[2*m+1] << endl;
-	//output_stage_position << position_history_array[2*fish_history_length] << ", " << position_history_array[2*fish_history_length+1] << endl;
-	//output_fish_tr << fish_tr_history_c_array[2*fish_history_length] << ", " << fish_tr_history_c_array[2*fish_history_length+1] << endl;
-	//output_fish_direction << fish_direction_history_c_array[2*fish_history_length] << ", " << fish_direction_history_c_array[2*fish_history_length+1] << endl;
-	////output_command.close();
-	//output_stage_position.close();
-	//output_fish_tr.close();
-	//output_fish_direction.close();
+	// ofstream output_command, output_stage_position, output_fish_tr, output_fish_direction;
+	// output_command.open("E:\\output_command.txt", ios::out|ios::app);
+	// output_stage_position.open("E:\\output_stage_position.txt", ios::out|ios::app);
+	// output_fish_tr.open("E:\\output_fish_tr.txt", ios::out|ios::app);
+	// output_fish_direction.open("E:\\output_fish_direction.txt", ios::out|ios::app);
+	// output_command << command_history_array[2*m] << ", " << command_history_array[2*m+1] << endl;
+	// output_stage_position << position_history_array[2*fish_history_length] << ", " << position_history_array[2*fish_history_length+1] << endl;
+	// output_fish_tr << fish_tr_history_c_array[2*fish_history_length] << ", " << fish_tr_history_c_array[2*fish_history_length+1] << endl;
+	// output_fish_direction << fish_direction_history_c_array[2*fish_history_length] << ", " << fish_direction_history_c_array[2*fish_history_length+1] << endl;
+	// output_command.close();
+	// output_stage_position.close();
+	// output_fish_tr.close();
+	// output_fish_direction.close();
 
 
 	//int m = 30;	//length of response kernel

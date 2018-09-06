@@ -208,22 +208,24 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 
 
 
-////to be deleted
-//	//display some results
-//	ofstream output_fish_v_predicted, output_fish_tr_predicted;
-//	output_fish_v_predicted.open("E:\\output_fish_v_predicted.txt", ios::out|ios::app);
-//	output_fish_tr_predicted.open("E:\\output_fish_tr_predicted.txt", ios::out|ios::app);
-//	output_fish_v_predicted << fish_velocity_average_proj*fish_direction_average.x << ", " << fish_velocity_average_proj*fish_direction_average.y << endl;
-//	output_fish_tr_predicted << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << 
-//		", " << predicted_fish_tr[0].x << ", " << predicted_fish_tr[0].y << 
-//		", " << fish_position_proj.x << ", " << fish_position_proj.y << 
-//		", " << fish_direction_average.x << ", " << fish_direction_average.y <<
-//		", " << fish_position_average.x << ", " << fish_position_average.y << ", ";
+//to be deleted
+	//display some results
+	// ofstream output_fish_v_predicted, output_fish_tr_predicted;
+	// output_fish_v_predicted.open("E:\\output_fish_v_predicted.txt", ios::out|ios::app);
+	// output_fish_tr_predicted.open("E:\\output_fish_tr_predicted.txt", ios::out|ios::app);
+	// output_fish_v_predicted << fish_velocity_average_proj*fish_direction_average.x << ", " << fish_velocity_average_proj*fish_direction_average.y << endl;
+	// output_fish_tr_predicted << 
+	// 	predicted_fish_tr[0].x << ", " << predicted_fish_tr[0].y << 
+	// 	", " << fish_position_proj.x << ", " << fish_position_proj.y << 
+	// 	", " << fish_direction_history.back().x << ", " << fish_direction_history.back().y << 
+	// 	", " << fish_direction_average.x << ", " << fish_direction_average.y <<
+	// 	", " << fish_position_average.x << ", " << fish_position_average.y <<
+	// 	", " << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << ", ";
 
 
 
 	/*shift yolk to head*/
-	it2 = fish_direction_history.begin();
+	it2 = fish_direction_history.end() - 1;
 	for (it = predicted_fish_tr.begin(); it != predicted_fish_tr.end(); it++)
 	{
 		it->x += it2->x*shift_head2yolk;
@@ -233,10 +235,10 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 
 
 
-////to be deleted
-//	output_fish_tr_predicted << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << endl;
-//	output_fish_v_predicted.close();
-//	output_fish_tr_predicted.close();
+// //to be deleted
+// 	output_fish_tr_predicted << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << endl;
+// 	output_fish_v_predicted.close();
+// 	output_fish_tr_predicted.close();
 
 
 
