@@ -279,57 +279,64 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//QueryPerformanceCounter(&timeEnd6);
 	//double elapsed6 = (timeEnd6.QuadPart - timeStart.QuadPart) / quadpart;
 
-	float 	dtemp;
-	float   d_t = 1;
-	int     x_min = LVWidth;
-	int     x_max = 0;
-	int     y_min = LVHeight;
-	int     y_max = 0;
-	Point extreme_Pt1;
-	Point extreme_Pt2;
-	Point Midpoint;
-	vector<Point>::iterator it;
-	if (vx > 0.7071)//horizontal
-	{
-		for (it = rough.begin(); it != rough.end(); it++)
-		{
-			dtemp = GetdistFromCenterline(*it, centerline_Param); //calculate the distance between the boundary point and centerline
-			if (dtemp < d_t){
-				if (it->x < x_min)
-				{
-					x_min = it->x;
-					extreme_Pt1 = *it;
-				}
-				if (it->x > x_max)
-				{
-					x_max = it->x;
-					extreme_Pt2 = *it;
-				}
-			}
-		}
-	}
-	else//vertical
-	{
-		for (it = rough.begin(); it != rough.end(); it++)
-		{
-			dtemp = GetdistFromCenterline(*it, centerline_Param); //calculate the distance between the boundary point and centerline
-			if (dtemp < d_t){
-				if (it->y < y_min)
-				{
-					y_min = it->y;
-					extreme_Pt1 = *it;
-				}
-				if (it->y > y_max)
-				{
-					y_max = it->y;
-					extreme_Pt2 = *it;
-				}
-			}
-		}
-	}
+	//float 	dtemp;
+	//float   d_t = 1;
+	//int     x_min = LVWidth;
+	//int     x_max = 0;
+	//int     y_min = LVHeight;
+	//int     y_max = 0;
+	//Point extreme_Pt1;
+	//Point extreme_Pt2;
+	//Point Midpoint;
+	//vector<Point>::iterator it;
+	//if (vx > 0.7071)//horizontal
+	//{
+	//	for (it = rough.begin(); it != rough.end(); it++)
+	//	{
+	//		dtemp = GetdistFromCenterline(*it, centerline_Param); //calculate the distance between the boundary point and centerline
+	//		if (dtemp < d_t){
+	//			if (it->x < x_min)
+	//			{
+	//				x_min = it->x;
+	//				extreme_Pt1 = *it;
+	//			}
+	//			if (it->x > x_max)
+	//			{
+	//				x_max = it->x;
+	//				extreme_Pt2 = *it;
+	//			}
+	//		}
+	//	}
+	//}
+	//else//vertical
+	//{
+	//	for (it = rough.begin(); it != rough.end(); it++)
+	//	{
+	//		dtemp = GetdistFromCenterline(*it, centerline_Param); //calculate the distance between the boundary point and centerline
+	//		if (dtemp < d_t){
+	//			if (it->y < y_min)
+	//			{
+	//				y_min = it->y;
+	//				extreme_Pt1 = *it;
+	//			}
+	//			if (it->y > y_max)
+	//			{
+	//				y_max = it->y;
+	//				extreme_Pt2 = *it;
+	//			}
+	//		}
+	//	}
+	//}
+	///* determine the midpoint of the centerline  */
+	//Midpoint.x = (extreme_Pt1.x + extreme_Pt2.x) / 2;
+	//Midpoint.y = (extreme_Pt1.y + extreme_Pt2.y) / 2;
+
 	/* determine the midpoint of the centerline  */
-	Midpoint.x = (extreme_Pt1.x + extreme_Pt2.x) / 2;
-	Midpoint.y = (extreme_Pt1.y + extreme_Pt2.y) / 2;
+	Point Midpoint;
+	RotatedRect minRect;
+	minRect = minAreaRect(Mat(rough));
+	Midpoint = Point(minRect.center);
+
 	//calculate barycenter of fish
 	Mat contourMask = Mat::zeros(ROI.size(), CV_8UC1);
 	drawContours(contourMask, contours, matching_index, 255, -1, LINE_8, noArray(), INT_MAX, Point(-ROI.x, -ROI.y));
