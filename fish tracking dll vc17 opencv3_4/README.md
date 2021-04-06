@@ -3,9 +3,10 @@ Pipeline
 1. subtract background
 2. threshold and morphological operation
 3. find contours
-4. select the closest contour to the fish centroid in last frame, and set ROI
+4. select the closest contour to the fish brain centroid in last frame, and set ROI
 5. find the heading direction by fitting line and the relationship between barycenter and center of the fish
-6. determin the precise centroid and heading vector by template matching
+6. determin the precise brain centroid and heading vector by template matching
+7. update the background while masking out the fish
 
 Notes
 ----------
