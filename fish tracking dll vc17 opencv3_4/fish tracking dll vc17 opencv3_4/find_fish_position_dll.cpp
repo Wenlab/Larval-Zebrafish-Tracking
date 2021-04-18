@@ -35,11 +35,11 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 		double Update_Ratio_Bkg)
 
 {
-	//LARGE_INTEGER timeStart;    //¿ªÊ¼Ê±¼ä  
- //   LARGE_INTEGER timeEnd,timeEnd1,timeEnd2,timeEnd3,timeEnd4,timeEnd5,timeEnd6,timeEnd7;      //½áÊøÊ±¼ä  
- //   LARGE_INTEGER frequency;    //¼ÆÊ±Æ÷ÆµÂÊ  
+	//LARGE_INTEGER timeStart;    //å¼€å§‹æ—¶é—´  
+ //   LARGE_INTEGER timeEnd,timeEnd1,timeEnd2,timeEnd3,timeEnd4,timeEnd5,timeEnd6,timeEnd7;      //ç»“æŸæ—¶é—´  
+ //   LARGE_INTEGER frequency;    //è®¡æ—¶å™¨é¢‘ç‡  
  //   QueryPerformanceFrequency(&frequency);  
- //   double quadpart = (double)frequency.QuadPart;//¼ÆÊ±Æ÷ÆµÂÊ  
+ //   double quadpart = (double)frequency.QuadPart;//è®¡æ—¶å™¨é¢‘ç‡  
  // 
  //   QueryPerformanceCounter(&timeStart);  
 
@@ -167,15 +167,15 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 
 
 			//QueryPerformanceCounter(&timeEnd);
-			////µÃµ½Á½¸öÊ±¼äµÄºÄÊ±  
+			////å¾—åˆ°ä¸¤ä¸ªæ—¶é—´çš„è€—æ—¶  
 			//double elapsed = (timeEnd.QuadPart - timeStart.QuadPart) / quadpart;
 			//ofstream out;
 			//out.open("E:\elapsed_time.txt", ios::out | ios::app);
-			//out << "no large contour, total: " << elapsed << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-			//out << "prepare: " << elapsed1 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-			//out << "subtract+blur+threshold: " << elapsed2 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-			//out << "morphology: " << elapsed3 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-			//out << "contours: " << elapsed4 << std::endl;//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
+			//out << "no large contour, total: " << elapsed << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+			//out << "prepare: " << elapsed1 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+			//out << "subtract+blur+threshold: " << elapsed2 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+			//out << "morphology: " << elapsed3 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+			//out << "contours: " << elapsed4 << std::endl;//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
 			//out.close();
 
 
@@ -196,15 +196,15 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 
 
 		//QueryPerformanceCounter(&timeEnd);
-		////µÃµ½Á½¸öÊ±¼äµÄºÄÊ±  
+		////å¾—åˆ°ä¸¤ä¸ªæ—¶é—´çš„è€—æ—¶  
 		//double elapsed = (timeEnd.QuadPart - timeStart.QuadPart) / quadpart;
 		//ofstream out;
 		//out.open("E:\elapsed_time.txt", ios::out | ios::app);
-		//out << "no contour, total: " << elapsed << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-		//out << "prepare: " << elapsed1 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-		//out << "subtract+blur+threshold: " << elapsed2 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-		//out << "morphology: " << elapsed3 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-		//out << "contours: " << elapsed4 << std::endl;//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
+		//out << "no contour, total: " << elapsed << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+		//out << "prepare: " << elapsed1 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+		//out << "subtract+blur+threshold: " << elapsed2 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+		//out << "morphology: " << elapsed3 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+		//out << "contours: " << elapsed4 << std::endl;//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
 		//out.close();
 
 
@@ -219,6 +219,8 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	Rect ROI;
 
 
+	// width, height: the width or height of ROI
+	// LVWidth, LVHeight: the width or height of field of view
 	tx = ((centroid.x - width / 2) > 0) ? centroid.x - width / 2 : 0;
 	ty = ((centroid.y - height / 2) > 0) ? centroid.y - height / 2 : 0;
 
@@ -253,7 +255,7 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//double elapsed5 = (timeEnd5.QuadPart - timeStart.QuadPart) / quadpart;
 
 
-	Mat Src_cut(Dst, ROI);
+	Mat Src_cut(Src, ROI);
 
 	vector<Point> rough;
 
@@ -279,77 +281,7 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//QueryPerformanceCounter(&timeEnd6);
 	//double elapsed6 = (timeEnd6.QuadPart - timeStart.QuadPart) / quadpart;
 
-	//float 	dtemp;
-	//float   d_t = 1;
-	//int     x_min = LVWidth;
-	//int     x_max = 0;
-	//int     y_min = LVHeight;
-	//int     y_max = 0;
-	//Point extreme_Pt1;
-	//Point extreme_Pt2;
-	//Point Midpoint;
-	//vector<Point>::iterator it;
-	//if (vx > 0.7071)//horizontal
-	//{
-	//	for (it = rough.begin(); it != rough.end(); it++)
-	//	{
-	//		dtemp = GetdistFromCenterline(*it, centerline_Param); //calculate the distance between the boundary point and centerline
-	//		if (dtemp < d_t){
-	//			if (it->x < x_min)
-	//			{
-	//				x_min = it->x;
-	//				extreme_Pt1 = *it;
-	//			}
-	//			if (it->x > x_max)
-	//			{
-	//				x_max = it->x;
-	//				extreme_Pt2 = *it;
-	//			}
-	//		}
-	//	}
-	//}
-	//else//vertical
-	//{
-	//	for (it = rough.begin(); it != rough.end(); it++)
-	//	{
-	//		dtemp = GetdistFromCenterline(*it, centerline_Param); //calculate the distance between the boundary point and centerline
-	//		if (dtemp < d_t){
-	//			if (it->y < y_min)
-	//			{
-	//				y_min = it->y;
-	//				extreme_Pt1 = *it;
-	//			}
-	//			if (it->y > y_max)
-	//			{
-	//				y_max = it->y;
-	//				extreme_Pt2 = *it;
-	//			}
-	//		}
-	//	}
-	//}
-	///* determine the midpoint of the centerline  */
-	//Midpoint.x = (extreme_Pt1.x + extreme_Pt2.x) / 2;
-	//Midpoint.y = (extreme_Pt1.y + extreme_Pt2.y) / 2;
 
-	/* determine the midpoint of the centerline  */
-	Point Midpoint;
-	RotatedRect minRect;
-	minRect = minAreaRect(Mat(rough));
-	Midpoint = Point(minRect.center);
-
-	//calculate barycenter of fish
-	Mat contourMask = Mat::zeros(ROI.size(), CV_8UC1);
-	drawContours(contourMask, contours, matching_index, 255, -1, LINE_8, noArray(), INT_MAX, Point(-ROI.x, -ROI.y));
-	Moments mu;
-	mu = moments(contourMask, true);
-	Point2d barycenter = Point2d(mu.m10 / mu.m00 + ROI.x, mu.m01 / mu.m00 + ROI.y);
-	Point2d heading_vector_rough = Point2d(barycenter.x - Midpoint.x, barycenter.y - Midpoint.y);
-
-	if (dot_product(heading_vector_rough, Point2d(vx, vy)) < 0)
-	{
-		vx = -vx;
-		vy = -vy;
-	}
 	double thetaHeading = atan2(-vy, vx);
 	if (thetaHeading < 0)
 	{
@@ -365,15 +297,14 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	double maxVal_matching_global = INT_MIN;
 	int index_template;
 	vector<Point> minLoc_matching, maxLoc_matching;
-	for (int i = 0; i < Templates.size(); i++)
+	int indices[4]; // fitlineç»“æœæ–¹å‘çš„é™„è¿‘ï¼ŒåŠåæ–¹å‘çš„é™„è¿‘
+	indices[0] = index;
+	indices[1] = (index+1) % Templates.size();
+	indices[2] = (index+Templates.size()/2) % Templates.size(); // Templates.size() should be even
+	indices[3] = (index+1+Templates.size()/2) % Templates.size();
+	for (int j = 0; j < 4; j++)
 	{
-		bool in_range = (i - index <= 2 && i - index >= -1) || (i + Templates.size() - index <= 2 && i + Templates.size() - index >= -1) || (i - Templates.size() - index <= 2 && i - Templates.size() - index >= -1);
-		if (!in_range)
-		{
-			minLoc_matching.push_back(Point(0, 0));
-			maxLoc_matching.push_back(Point(0, 0));
-			continue;
-		}
+		i = indices[j];
 		//template matching
 		Template = Templates[i];
 		matchTemplate(Src_cut, Template, Result, CV_TM_CCOEFF_NORMED);
@@ -390,7 +321,7 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 		if (maxVal_matching > maxVal_matching_global)
 		{
 			maxVal_matching_global = maxVal_matching;
-			index_template = i;
+			index_template = j;
 		}
 	}
 	//normalize(Result, Result, 0, 1, NORM_MINMAX, -1, Mat());
@@ -401,13 +332,13 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//imshow("Template", Templates[index_template]);
 	//Mat Location;
 	//Src.copyTo(Location);
-	double angle = index_template * 2.0 / Templates.size() * PI;
+	double angle = indices[index_template] * 2.0 / Templates.size() * PI;
 	vx = cos(angle);
-	vy = -sin(angle);
+	vy = -sin(angle); // y axis is downward
 	heading_vector->x = vx;
 	heading_vector->y = vy;
-	centroid_out->x = maxLoc_matching[index_template].x + Templates[index_template].cols / 2 + vx * shift;
-	centroid_out->y = maxLoc_matching[index_template].y + Templates[index_template].rows / 2 + vy * shift;
+	centroid_out->x = maxLoc_matching[index_template].x + Templates[indices[index_template]].cols / 2 + vx * shift;
+	centroid_out->y = maxLoc_matching[index_template].y + Templates[indices[index_template]].rows / 2 + vy * shift;
 	//rectangle(Location, maxLoc_matching[index_template], Point(maxLoc_matching[index_template].x + Templates[index_template].cols, maxLoc_matching[index_template].y + Templates[index_template].rows), Scalar::all(255), 2, 8, 0);
 	//rectangle(Location, ROI, 125);
 	//line(Location, Point(centroid_out->x - 50 * vx, centroid_out->y - 50 * vy), Point(centroid_out->x + 50 * vx, centroid_out->y + 50 * vy), Scalar::all(0));
@@ -468,20 +399,20 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 
 
 	//QueryPerformanceCounter(&timeEnd);
-	////µÃµ½Á½¸öÊ±¼äµÄºÄÊ±  
+	////å¾—åˆ°ä¸¤ä¸ªæ—¶é—´çš„è€—æ—¶  
 	//double elapsed = (timeEnd.QuadPart - timeStart.QuadPart) / quadpart;
 	//ofstream out;
 	//out.open("E:\\elapsed_time.txt", ios::out | ios::app);
 	//out << "total: " << elapsed << "s" << endl;
 	//if (elapsed > 0.002) out << "timeout" << endl;
-	//out << "shift=1, FISH_FOUND, total: " << elapsed << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "prepare: " << elapsed1 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "subtract+blur+threshold: " << elapsed2 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "morphology: " << elapsed3 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "contour: " << elapsed4 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "distanceTransform: " << elapsed5 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "calculate_shift: " << elapsed5 << "\t";//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
-	//out << "update_background: " << elapsed7 << endl;//µ¥Î»ÎªÃë£¬¾«¶ÈÎªÎ¢Ãë(1000000/cpuÖ÷Æµ)
+	//out << "shift=1, FISH_FOUND, total: " << elapsed << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "prepare: " << elapsed1 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "subtract+blur+threshold: " << elapsed2 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "morphology: " << elapsed3 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "contour: " << elapsed4 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "distanceTransform: " << elapsed5 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "calculate_shift: " << elapsed5 << "\t";//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
+	//out << "update_background: " << elapsed7 << endl;//å•ä½ä¸ºç§’ï¼Œç²¾åº¦ä¸ºå¾®ç§’(1000000/cpuä¸»é¢‘)
 	//out.close();
 
 	//if (elapsed>0.01)
