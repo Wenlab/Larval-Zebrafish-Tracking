@@ -5,6 +5,7 @@ Point2d MPC(int m, int predict_length, vector<Point2d> H, double gammaX, double 
 	vector<Point2d> command_history, vector<Point2d> position_history,
 	vector<Point2d> fish_tr_history, vector<Point2d> fish_direction_history)
 {
+	 
 	vector<Point2d> predicted_fish_tr;	//predicted fish trajectory
 	/*predict fish trajectory*/
 	predict_fish_tr(predicted_fish_tr,
@@ -96,6 +97,16 @@ Point2d MPC(int m, int predict_length, vector<Point2d> H, double gammaX, double 
 	Point2d c1;
 	c1.x = x1.at<double>(0, 0);
 	c1.y = x2.at<double>(0, 0);
+	
+//to be deleted
+	//display some results
+	//ofstream output_command_position;
+	//output_command_position.open("E:\\output_command_position.txt", ios::out|ios::app);
+	//output_command_position << 
+	//	c1.x << ", " << c1.y <<  
+	//	", " << position_history.back().x << ", " << position_history.back().y << endl;
+ 	//output_command_position.close();
+	
 	return c1;
 }
 
@@ -156,12 +167,21 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 		fish_direction_average.y += it->y;
 	}
 	fish_direction_average_length = sqrt(inner_prod(fish_direction_average, fish_direction_average));
-	if (fish_direction_average_length < 1)	//the fish is taking a U-turn. 可以根据实际的鱼的情况确定该条件
+	if (fish_direction_average_length < 1)	//the fish is taking a U-turn. 鍙互鏍规嵁瀹為檯鐨勯奔鐨勬儏鍐电‘瀹氳鏉′欢
 	{
 		for (int t = 1; t <= predict_length; t++)	//if the fish is taking a U-turn, we give up predicting the fish trajectory, and just assume that the fish stays static.
 		{
 			predicted_fish_tr.push_back(fish_tr_history.back());
 		}
+		
+		/*shift yolk to head*/
+		it2 = fish_direction_history.end() - 1;
+		for (it = predicted_fish_tr.begin(); it != predicted_fish_tr.end(); it++)
+		{
+			it->x += it2->x*shift_head2yolk;
+			it->y += it2->y*shift_head2yolk;
+		}
+		
 		return;
 	}
 	else
