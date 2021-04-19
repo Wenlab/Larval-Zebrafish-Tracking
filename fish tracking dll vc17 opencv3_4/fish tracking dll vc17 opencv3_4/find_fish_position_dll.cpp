@@ -302,9 +302,15 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	indices[1] = (index+1) % Templates.size();
 	indices[2] = (index+Templates.size()/2) % Templates.size(); // Templates.size() should be even
 	indices[3] = (index+1+Templates.size()/2) % Templates.size();
-	for (int j = 0; j < 4; j++)
+	for (int i = 0; i < Templates.size(); i++)
 	{
-		i = indices[j];
+		bool in_range = (i == indices[0]) || (i == indices[1]) || (i == indices[2]) || (i == indices[3]);
+		if (!in_range)
+		{
+			minLoc_matching.push_back(Point(0, 0));
+			maxLoc_matching.push_back(Point(0, 0));
+			continue;
+		}
 		//template matching
 		Template = Templates[i];
 		matchTemplate(Src_cut, Template, Result, CV_TM_CCOEFF_NORMED);
@@ -321,7 +327,7 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 		if (maxVal_matching > maxVal_matching_global)
 		{
 			maxVal_matching_global = maxVal_matching;
-			index_template = j;
+			index_template = i;
 		}
 	}
 	//normalize(Result, Result, 0, 1, NORM_MINMAX, -1, Mat());
@@ -332,13 +338,13 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//imshow("Template", Templates[index_template]);
 	//Mat Location;
 	//Src.copyTo(Location);
-	double angle = indices[index_template] * 2.0 / Templates.size() * PI;
+	double angle = index_template * 2.0 / Templates.size() * PI;
 	vx = cos(angle);
 	vy = -sin(angle); // y axis is downward
 	heading_vector->x = vx;
 	heading_vector->y = vy;
-	centroid_out->x = maxLoc_matching[index_template].x + Templates[indices[index_template]].cols / 2 + vx * shift;
-	centroid_out->y = maxLoc_matching[index_template].y + Templates[indices[index_template]].rows / 2 + vy * shift;
+	centroid_out->x = maxLoc_matching[index_template].x + Templates[index_template].cols / 2 + vx * shift;
+	centroid_out->y = maxLoc_matching[index_template].y + Templates[index_template].rows / 2 + vy * shift;
 	//rectangle(Location, maxLoc_matching[index_template], Point(maxLoc_matching[index_template].x + Templates[index_template].cols, maxLoc_matching[index_template].y + Templates[index_template].rows), Scalar::all(255), 2, 8, 0);
 	//rectangle(Location, ROI, 125);
 	//line(Location, Point(centroid_out->x - 50 * vx, centroid_out->y - 50 * vy), Point(centroid_out->x + 50 * vx, centroid_out->y + 50 * vy), Scalar::all(0));
