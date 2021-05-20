@@ -19,18 +19,18 @@ Point2d MPC(int m, int predict_length, vector<Point2d> H, double gammaX, double 
 		H, m, predict_length);
 
 
-	Mat A1(predict_length - 1, predict_length - 1, CV_64FC1);	//Ax=b (x direction)
-	Mat x1(predict_length - 1, 1, CV_64FC1);	//predicted optimal commands
-	Mat b1(predict_length - 1, 1, CV_64FC1);
-	Mat A2(predict_length - 1, predict_length - 1, CV_64FC1);	//Ax=b (y direction)
-	Mat x2(predict_length - 1, 1, CV_64FC1);	//predicted optimal commands
-	Mat b2(predict_length - 1, 1, CV_64FC1);
+	Mat A1(predict_length, predict_length, CV_64FC1);	//Ax=b (x direction)
+	Mat x1(predict_length, 1, CV_64FC1);	//predicted optimal commands
+	Mat b1(predict_length, 1, CV_64FC1);
+	Mat A2(predict_length, predict_length, CV_64FC1);	//Ax=b (y direction)
+	Mat x2(predict_length, 1, CV_64FC1);	//predicted optimal commands
+	Mat b2(predict_length, 1, CV_64FC1);
 
 	/*calculate A*/
 	double a1, a2;
-	for (int i = 2; i <= predict_length; i++)
+	for (int i = 1; i <= predict_length; i++)
 	{
-		for (int j = 2; j <= predict_length; j++)
+		for (int j = 1; j <= predict_length; j++)
 		{
 			a1 = 0;
 			a2 = 0;
@@ -40,54 +40,31 @@ Point2d MPC(int m, int predict_length, vector<Point2d> H, double gammaX, double 
 				a2 += calcHt(H, k - i + 1).y * calcHt(H, k - j + 1).y;
 			}
 
-			//L2 penalty to the planned future acceleration vector
+			//L2 penalty to the planned future command vector
 			if (i == j)
 			{
-				if (i == predict_length)
-				{
-					a1 += gammaX;
-					a2 += gammaY;
-				}
-				else
-				{
-					a1 += gammaX * 2;
-					a2 += gammaY * 2;
-				}
-			}
-			else
-			{
-				if (i == j + 1 || i + 1 == j)
-				{
-					a1 -= gammaX;
-					a2 -= gammaY;
-				}
+				a1 += gammaX;
+				a2 += gammaY;
 			}
 
-			A1.at<double>(i-2, j-2) = a1;
-			A2.at<double>(i-2, j-2) = a2;
+			A1.at<double>(i-1, j-1) = a1;
+			A2.at<double>(i-1, j-1) = a2;
 		}
 	}
 	/*calculate b*/
 	double bb1, bb2, bbb1, bbb2;
-	for (int i = 2; i <= predict_length; i++)
+	for (int i = 1; i <= predict_length; i++)
 	{
 		bb1 = 0;
 		bb2 = 0;
-		bbb1 = 0;
-		bbb2 = 0;
 		for (int k = 1; k <= predict_length; k++)
 		{
 			bb1 -= calcHt(H, k - i + 1).x*(predicted_stage_positions[k].x + predicted_fish_tr[k].x);
 			bb2 -= calcHt(H, k - i + 1).y*(predicted_stage_positions[k].y + predicted_fish_tr[k].y);
-			bbb1 -= calcHt(H, k - i + 2).x*calcHt(H, k - i + 1).x;
-			bbb2 -= calcHt(H, k - i + 2).y*calcHt(H, k - i + 1).y;
 		}
-		b1.at<double>(i - 2, 0) = bb1 + bbb1*command_history.back().x;
-		b2.at<double>(i - 2, 0) = bb2 + bbb1*command_history.back().y;
+		b1.at<double>(i - 1, 0) = bb1;
+		b2.at<double>(i - 1, 0) = bb2;
 	}
-	//L2 penalty to the planned future acceleration vector
-	b1.at<double>(0, 0) += gammaX*command_history.back().x;
-	b2.at<double>(0, 0) += gammaY*command_history.back().y;
 
 	/*solve for x*/
 	x1 = A1.inv(DECOMP_EIG)*b1;
