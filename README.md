@@ -21,3 +21,7 @@ Tracking-system-for-larval-zebrafish is written by Quan Wen, Fan Gao, Zeguan Wan
 Contact
 -------
 Please contact Daguang Li, by hrcs (at) mail (dot) ustc (dot) edu (dot) cn with questions or feedback.
+
+Branches
+-------
+operant_learning: Branch 'operant_learning' is a branch for the operant learning project. There is an additional communication module to send the tracking results to the stimulation control system. Then the stimulation control system can switch the stimulation according to the fish position relative to the arena and the heading vector of the fish.
