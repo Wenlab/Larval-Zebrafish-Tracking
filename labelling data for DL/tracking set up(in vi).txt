@@ -1,0 +1,15 @@
+template size: 48
+bin threshold: 80
+counting threshold: 200
+ROI width: 110
+ROI height: 110
+width fish: 20
+length fish: 115
+shift(from the center of template to head): 9
+
+m(length of kernel): 30
+predict length: 6
+length of fish history: 4
+gammaa: 0.03
+max command: 10
+shift head to yolk: 18
