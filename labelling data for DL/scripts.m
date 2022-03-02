@@ -1,6 +1,7 @@
 % load and extract key frames
-path_src = 'raw data/';
-filename_in = '2022_01_15-18_23_45.avi';
+path_root = 'D:/Daguang Li/tracking by deep learning/labelling data/';
+path_src = [path_root,'raw data/'];
+filename_in = '2022_01_07-10_46_12.avi';
 step_size = 500;
 KeyFrames = extractKeyFrames([path_src,filename_in],step_size);
 num_keyframes = size(KeyFrames,4);
@@ -33,6 +34,7 @@ shift_head2yolk = 22;
 for i = 1:num_keyframes
     result(i).yolk = result(i).head - shift_head2yolk*result(i).heading_vector;
 end
+%% remember to save the variable 'result'!!!
 % display
 figure;
 prefix = [path_src,filename_in];
@@ -54,7 +56,9 @@ for i = 1:num_keyframes
     waitforbuttonpress;
 end
 
-% extract samples
-extractData;
-%% check manually
-extract_augment_Data;
+% % extract samples
+% extractData;
+% %% check manually
+% extract_augment_Data;
+
+augmentData
