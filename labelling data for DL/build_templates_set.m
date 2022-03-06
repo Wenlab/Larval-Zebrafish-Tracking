@@ -1,8 +1,8 @@
 %% load, align and average all the pictures
 num_frames = 3;
-head = [381, 181; 385, 179; 398, 181];
-yolk = [394, 165; 404, 187; 378, 183];
-shift_head2center = [13,0];
+head = [387, 181; 382, 182; 387, 152];
+yolk = [378, 201; 401, 175; 386, 172];
+shift_head2center = [12,0];
 template_size = 50; % (145:194, 156:205)
 num_templates = 72;
 % path_src = 'raw data/';
