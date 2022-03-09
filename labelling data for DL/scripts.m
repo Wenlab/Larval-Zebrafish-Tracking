@@ -46,11 +46,18 @@ for i = 1:num_keyframes
     waitforbuttonpress;
 end
 
-%% manually label the frame without fish
-% for i = 1:num_keyframes
-%     result(i).nonfish = 0;
-% end
+%% manually label the frame without fish and correct the labels where template matching failed
+for i = 1:num_keyframes
+    result(i).nonfish = 0;
+end
 % result(131).nonfish = 1;
+% result(150 ).head = [353,173];
+% result(150 ).yolk = [370,184];
+% result(150 ).center = [360,177];
+% for i = [21,150,175,206,249,261,265,279]
+%     temp = result(i).head - result(i).yolk;
+%     result(i).heading_vector = temp/norm(temp);
+% end
 
 %% save the variable 'result'
 path_dst = [path_root,filename_in];
@@ -67,3 +74,30 @@ save(filename_dst,'result');
 % extract_augment_Data;
 
 augmentData
+
+
+
+%% some codes for format transformation, padding etc.
+% path_root = 'D:/Daguang Li/tracking by deep learning/labelling data/';
+% path_src = [path_root,'raw data/'];
+% filename_in = 'complex_background_maze.mov';
+% v = VideoReader([path_src,filename_in]);
+% filename_out = filename_in;
+% filename_out(end-3:end) = [];
+% filename_out = [filename_out,'.avi'];
+% writer = VideoWriter([path_src,filename_out],'Uncompressed AVI');
+% writer.FrameRate = v.FrameRate;
+% open(writer);
+% while hasFrame(v)
+% img = readFrame(v);
+% writeVideo(writer,img);
+% end
+% close(writer);
+
+% for i = 1:num_keyframes
+%     C = KeyFrames(:,:,:,i);
+%     C = rgb2gray(C);
+%     D = padarray(C,[44 80],0,'both');
+%     filename_keyframe = [prefix , '_' , num2str(i,'%05d') , '.' , extension];
+%     imwrite(D,filename_keyframe);
+% end
