@@ -7,6 +7,25 @@ MPC_DLL_API int MPC_dll(int m, int predict_length, int fish_history_length,
 	double *command_history_array, int *position_history_array, int *fish_tr_history_c_array, double *fish_direction_history_c_array, 
 	Point2d *c0)
 {
+	//ofstream out;
+	//out.open("H:\\test_MPC.txt", ios::out | ios::app);
+	//out << "Function begins!\n";
+	//out.close();
+	//out.open("H:\\test_MPC.txt", ios::out | ios::app);
+	//out << "m: " << m << endl;
+	//out << "predict_length: " << predict_length << endl;
+	//out << "fish_history_length: " << fish_history_length << endl;
+	//out << "gammaX: " << gammaX << endl;
+	//out << "gammaY: " << gammaY << endl;
+	//out << "max_command: " << max_command << endl;
+	//out << "shift_head2yolk: " << shift_head2yolk << endl;
+	//out << "scale_x: " << scale_x << endl;
+	//out << "scale_y: " << scale_y << endl;
+	//out << "theta: " << theta << endl;
+	//out << "scale_x2: " << scale_x2 << endl;
+	//out << "scale_y2: " << scale_y2 << endl;
+	//out << "dst_fish_position: " << dst_fish_position->x << ", " << dst_fish_position->y << endl;
+	//out.close();
 	///*to be deleted*/
 	////elapsed time
 	//LARGE_INTEGER timeStart;    //开始时间  
@@ -167,6 +186,9 @@ MPC_DLL_API int MPC_dll(int m, int predict_length, int fish_history_length,
 	if (c0->y < -max_command)
 		c0->y = -max_command;
 	//cout << "c0: " << c0->x << "\t" << c0->y << endl;
+	//out.open("H:\\test_MPC.txt", ios::out | ios::app);
+	//out << "c0: " << c0->x << ", " << c0->y << endl;
+	//out.close();
 
 	///*to be deleted*/
 	//output << "c0: " << c0->x << ", " << c0->y << endl;
@@ -175,6 +197,10 @@ MPC_DLL_API int MPC_dll(int m, int predict_length, int fish_history_length,
 	//output << "elapsed time: " << elapsed << endl;
 	//output << "======================" << endl;
 	//output.close();
+	//out.open("H:\\test_MPC.txt", ios::out | ios::app);
+	//out << "elapsed time: " << elapsed << endl;
+	//out.close();
+
 
 	return 0;
 
