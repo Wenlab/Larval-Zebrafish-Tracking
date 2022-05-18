@@ -1,41 +1,41 @@
 ﻿  stdafx.cpp
   dllmain.cpp
   find_fish_position_dll.cpp
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(291): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(303): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(304): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(342): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(343): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(346): warning C4244: '=': conversion from 'float' to '_Tp', possible loss of data
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(325): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(337): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(338): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(376): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(377): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(380): warning C4244: “=”: 从“float”转换到“_Tp”，可能丢失数据
           with
           [
               _Tp=int
           ]
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(347): warning C4244: '=': conversion from 'float' to '_Tp', possible loss of data
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(381): warning C4244: “=”: 从“float”转换到“_Tp”，可能丢失数据
           with
           [
               _Tp=int
           ]
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(392): warning C4244: 'argument': conversion from 'float' to '_Tp', possible loss of data
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(432): warning C4244: “参数”: 从“float”转换到“_Tp”，可能丢失数据
           with
           [
               _Tp=int
           ]
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(455): warning C4244: '=': conversion from 'double' to '_Tp', possible loss of data
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(501): warning C4244: “=”: 从“double”转换到“_Tp”，可能丢失数据
           with
           [
               _Tp=int
           ]
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(456): warning C4244: '=': conversion from 'double' to '_Tp', possible loss of data
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(502): warning C4244: “=”: 从“double”转换到“_Tp”，可能丢失数据
           with
           [
               _Tp=int
           ]
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(520): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(556): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-e:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(557): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-     Creating library E:\TrackingUsingOpenCV3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\x64\Release\fish tracking dll vc17 opencv3_4.lib and object E:\TrackingUsingOpenCV3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\x64\Release\fish tracking dll vc17 opencv3_4.exp
-  Generating code
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(566): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(602): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+f:\trackingusingopencv3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\fish tracking dll vc17 opencv3_4\find_fish_position_dll.cpp(603): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+    正在创建库 F:\TrackingUsingOpenCV3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\x64\Release\fish tracking dll vc17 opencv3_4.lib 和对象 F:\TrackingUsingOpenCV3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\x64\Release\fish tracking dll vc17 opencv3_4.exp
+  正在生成代码
   All 463 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  fish tracking dll vc17 opencv3_4.vcxproj -> E:\TrackingUsingOpenCV3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\x64\Release\fish tracking dll vc17 opencv3_4.dll
+  已完成代码的生成
+  fish tracking dll vc17 opencv3_4.vcxproj -> F:\TrackingUsingOpenCV3_with_bkg_subtr_and_pred_and_temp_matching_nodisplay - 210309\fish tracking dll vc17 opencv3_4\x64\Release\fish tracking dll vc17 opencv3_4.dll

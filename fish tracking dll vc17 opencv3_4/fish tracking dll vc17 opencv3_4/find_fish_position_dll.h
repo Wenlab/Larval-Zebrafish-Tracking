@@ -38,9 +38,9 @@ using namespace std;
 //counting_thresh: if the number of white points in the image after threshold is smaller than counting_thresh, no fish here.
 //width_fish,length_fish: for calculating the mask. while the source image size is 1040*768, the fish is about 300*60.
 FIND_FISH_POSITION_DLL_API int find_centroid(
-	char* LVImagePtrSrc, int LVLineWidthSrc,
-	char* LVImagePtrDst, int LVLineWidthDst,
-	char* LVImagePtrBkg, int LVLineWidthBkg,
+	unsigned char* LVImagePtrSrc, int LVLineWidthSrc,
+	unsigned char* LVImagePtrDst, int LVLineWidthDst,
+	unsigned char* LVImagePtrBkg, int LVLineWidthBkg,
 	int LVWidth, int LVHeight,
 	int BkgWidth, int BkgHeight,
 	unsigned char* templates, int n_templates, int TemplatesSize,

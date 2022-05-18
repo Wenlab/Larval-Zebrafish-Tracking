@@ -21,9 +21,9 @@ using namespace std;
 
 // This is an example of an exported function.
 FIND_FISH_POSITION_DLL_API int find_centroid(
-	char* LVImagePtrSrc, int LVLineWidthSrc,
-	char* LVImagePtrDst, int LVLineWidthDst,
-	char* LVImagePtrBkg, int LVLineWidthBkg,
+	unsigned char* LVImagePtrSrc, int LVLineWidthSrc,
+	unsigned char* LVImagePtrDst, int LVLineWidthDst,
+	unsigned char* LVImagePtrBkg, int LVLineWidthBkg,
 	int LVWidth, int LVHeight,
 	int BkgWidth, int BkgHeight,
 	unsigned char* templates, int n_templates, int TemplatesSize,
@@ -35,6 +35,10 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	double Update_Ratio_Bkg)
 
 {
+	//ofstream out;
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "Function begins!\n";
+	//out.close();
 	//LARGE_INTEGER timeStart;    //开始时间  
  //   LARGE_INTEGER timeEnd,timeEnd1,timeEnd2,timeEnd3,timeEnd4,timeEnd5,timeEnd6,timeEnd7;      //结束时间  
  //   LARGE_INTEGER frequency;    //计时器频率  
@@ -54,7 +58,7 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//cout << "Switched to " << (ocl::useOpenCL() ? "OpenCL enabled" : "CPU") << " mode\n";
 
 
-	IplImage *CVImageSrc, *CVImageDst, *CVImageBkg;
+	//IplImage *CVImageSrc, *CVImageDst, *CVImageBkg;
 
 	CvSize ImageSize, BkgGlobalSize;
 
@@ -72,20 +76,25 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	ImageSize = cvSize(LVWidth, LVHeight);
 	BkgGlobalSize = cvSize(BkgWidth, BkgHeight);
 
-	CVImageSrc = cvCreateImageHeader(ImageSize, IPL_DEPTH_8U, 1);
-	CVImageSrc->imageData = LVImagePtrSrc;
-	CVImageSrc->widthStep = LVLineWidthSrc;
-	CVImageDst = cvCreateImageHeader(ImageSize, IPL_DEPTH_8U, 1);
-	CVImageDst->imageData = LVImagePtrDst;
-	CVImageDst->widthStep = LVLineWidthDst;
-	CVImageBkg = cvCreateImageHeader(BkgGlobalSize, IPL_DEPTH_8U, 1);
-	CVImageBkg->imageData = LVImagePtrBkg;
-	CVImageBkg->widthStep = LVLineWidthBkg;
+	//CVImageSrc = cvCreateImageHeader(ImageSize, IPL_DEPTH_8U, 1);
+	//CVImageSrc->imageData = LVImagePtrSrc;
+	//CVImageSrc->widthStep = LVLineWidthSrc;
+	//CVImageDst = cvCreateImageHeader(ImageSize, IPL_DEPTH_8U, 1);
+	//CVImageDst->imageData = LVImagePtrDst;
+	//CVImageDst->widthStep = LVLineWidthDst;
+	//CVImageBkg = cvCreateImageHeader(BkgGlobalSize, IPL_DEPTH_8U, 1);
+	//CVImageBkg->imageData = LVImagePtrBkg;
+	//CVImageBkg->widthStep = LVLineWidthBkg;
 
 	bool setROI = TRUE;
 
 	Mat Bkg;
-	Mat Bkg_global = cvarrToMat(CVImageBkg);
+	//Mat Bkg_global = cvarrToMat(CVImageBkg);
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "BkgWidth: " << BkgWidth << "; BkgHeight: " << BkgHeight << endl;
+	//out.close();
+	Mat Bkg_global = Mat(BkgHeight, BkgWidth, CV_8UC1, LVImagePtrBkg);
+	//imwrite("H:\\Bkg_global.jpg", Bkg_global);
 	//transform_coordination(position, BkgWidth, BkgHeight, scale_x, scale_y, theta);
 	//crop_background(Bkg_global, Bkg, position,
 	//	LVWidth, LVHeight);
@@ -93,11 +102,17 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	transform_coordination(&stage_position, BkgWidth, BkgHeight, scale_x, scale_y, theta);
 	crop_background(Bkg_global, Bkg, &stage_position,
 		LVWidth, LVHeight);
+	//imwrite("H:\\Bkg.jpg", Bkg);
 
 	Rect Mask;
 
-	Mat Src = cvarrToMat(CVImageSrc);
-	Mat Dst = cvarrToMat(CVImageDst);
+	//cvSaveImage("H:\\CVImageSrc.jpg", CVImageSrc);
+	//Mat Src = cvarrToMat(CVImageSrc);
+	//Mat Dst = cvarrToMat(CVImageDst);
+	Mat Src = Mat(LVHeight, LVWidth, CV_8UC1, LVImagePtrSrc);
+	//imwrite("H:\\Src.jpg", Src);
+	Mat Dst = Mat(LVHeight, LVWidth, CV_8UC1, LVImagePtrDst);
+	//imwrite("H:\\Dst.jpg", Dst);
 	Mat Binary, Temp;
 
 	vector<Mat> Templates;
@@ -107,16 +122,30 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 		Temp = Mat(TemplatesSize, TemplatesSize, CV_8UC1, templates + sizeof(unsigned char)*TemplatesSize*TemplatesSize*i);
 		Templates.push_back(Temp);
 	}
+	//imwrite("H:\\Template0.jpg", Templates.front());
 
 
 	//QueryPerformanceCounter(&timeEnd1);
 	//double elapsed1 = (timeEnd1.QuadPart - timeStart.QuadPart) / quadpart;
+	
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "Initialization complete!\n";
+	//out << "CVImageSrc->widthStep: " << CVImageSrc->widthStep << endl;
+	//out << "Src image size: " << Src.size() << endl;
+	//out << "(103,125): " << Src.at<char>(103, 125) << endl;
+	//out.close();
 
+	
+	
+	
 	subtract(Src, Bkg, Dst);
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "Background subtraction complete!\n";
 	threshold(Dst, Binary, BinThresh, 255, THRESH_BINARY);
 	erode(Binary, Binary, Mat());
 	dilate(Binary, Binary, Mat());
-
+	//out << "Graphical operation complete!\n";
+	//out.close();
 	//QueryPerformanceCounter(&timeEnd2);
 	//double elapsed2 = (timeEnd2.QuadPart - timeStart.QuadPart) / quadpart;
 
@@ -137,8 +166,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 
 
 	findContours(Binary, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-
-
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "findContours complete!\n";
+	//out.close();
 
 
 
@@ -253,7 +283,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 
 	//QueryPerformanceCounter(&timeEnd5);
 	//double elapsed5 = (timeEnd5.QuadPart - timeStart.QuadPart) / quadpart;
-
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "ROI complete!\n";
+	//out.close(); 
 
 	Mat Src_cut(Src, ROI);
 
@@ -271,7 +303,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	float vx, vy, x0, y0;
 
 	fitLine(rough, centerline_Param, CV_DIST_L2, 0, 0.01, 0.01);
-
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "fitLine complete!\n";
+	//out.close(); 
 
 	vx = centerline_Param[0];
 	vy = centerline_Param[1];
@@ -350,6 +384,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//line(Location, Point(centroid_out->x - 50 * vx, centroid_out->y - 50 * vy), Point(centroid_out->x + 50 * vx, centroid_out->y + 50 * vy), Scalar::all(0));
 	//circle(Location, *centroid_out, 3, Scalar::all(0));
 	//imshow("Location", Location);
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "Template matching complete!\n";
+	//out.close(); 
 
 
 	//calculate the Mask for updating the background excluding the fish
@@ -383,6 +420,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 		error_out << "update_background failed!" << endl;
 		error_out.close();
 	}
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "update_background complete!\n";
+	//out.close(); 
 
 	//rectangle(Src, Point(Mask.x, Mask.y), Point(Mask.x + Mask.width, Mask.y + Mask.height), 125);
 	//circle(Src,*centroid_out,width_fish/2,255);
@@ -394,6 +434,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//namedWindow("Result", CV_WINDOW_AUTOSIZE);
 	//imshow("Result", Dst);
 	//waitKey(1);
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "Drawing complete!\n";
+	//out.close();
 
 
 
@@ -407,6 +450,9 @@ FIND_FISH_POSITION_DLL_API int find_centroid(
 	//QueryPerformanceCounter(&timeEnd);
 	////得到两个时间的耗时  
 	//double elapsed = (timeEnd.QuadPart - timeStart.QuadPart) / quadpart;
+	//out.open("H:\\test_find_fish.txt", ios::out | ios::app);
+	//out << "elapsed time: " << elapsed << endl;
+	//out.close();
 	//ofstream out;
 	//out.open("E:\\elapsed_time.txt", ios::out | ios::app);
 	//out << "total: " << elapsed << "s" << endl;
