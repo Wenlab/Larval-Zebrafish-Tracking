@@ -1,6 +1,7 @@
 %% crop the image from 672*360 to 360*360
 %% and augment data by rotation
-sample_size = [360,360];
+flag_exclude_nonfish = true; % whether exclude nonfish samples
+sample_size = [320,320];
 border = 20; % if the fish is outside after rotation, we will translate the image to make sure the fish is in and 'border' away from the border
 prefix = [path_src, filename_in];
 prefix(end - 3:end) = [];
@@ -12,6 +13,9 @@ mkdir(path_dst);
 idx_sample = 1;
 labels = []; % [head_x, head_y, yolk_x, yolk_y, nonfish]
 for i = 1:num_keyframes
+    if result(i).nonfish && flag_exclude_nonfish
+        continue;
+    end
     filename_keyframe = [prefix , '_' , num2str(i,'%05d') , '.' , extension];
     keyframe = imread(filename_keyframe);
     center_image(1) = (size(keyframe,2) + 1)/2;
@@ -61,11 +65,13 @@ for i = 1:num_keyframes
         range_x2_new = round(center_J(1) - shift_image(1) + sample_size(2)/2 - 1);
         range_y1_new = round(center_J(2) - shift_image(2) - sample_size(1)/2);
         range_y2_new = round(center_J(2) - shift_image(2) + sample_size(1)/2 - 1);
-        sample = J(range_y1_new:range_y2_new,range_x1_new:range_x2_new);
-        filename_dst = [path_dst,num2str(idx_sample,'%05d') , '.' , extension];
-        imwrite(sample,filename_dst);
-        labels = [labels; head_rotated + shift_image + [1 - range_x1, 1 - range_y1], yolk_rotated + shift_image + [1 - range_x1, 1 - range_y1], result(i).nonfish];
-        idx_sample = idx_sample + 1;
+        if range_x1_new>0 && range_x2_new<=size(J,2) && range_y1_new>0 && range_y2_new<=size(J,1) 
+            sample = J(range_y1_new:range_y2_new,range_x1_new:range_x2_new);
+            filename_dst = [path_dst,num2str(idx_sample,'%05d') , '.' , extension];
+            imwrite(sample,filename_dst);
+            labels = [labels; head_rotated + shift_image + [1 - range_x1, 1 - range_y1], yolk_rotated + shift_image + [1 - range_x1, 1 - range_y1], result(i).nonfish];
+            idx_sample = idx_sample + 1;
+        end
 
         % % display
         % imshow(sample);

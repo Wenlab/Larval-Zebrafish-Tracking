@@ -32,8 +32,8 @@ void VoltageInput::volInitialize()
 	DAQmxErrChk(DAQmxCreateTask("", &_taskHandle1));
 	DAQmxErrChk(DAQmxCreateTask("", &_taskHandle2));
 
-	DAQmxErrChk(DAQmxCreateAOVoltageChan(_taskHandle1, "Dev1/ao0", "", -1.0, 1.0, DAQmx_Val_Volts, ""));
-	DAQmxErrChk(DAQmxCreateAOVoltageChan(_taskHandle2, "Dev1/ao1", "", -1.0, 1.0, DAQmx_Val_Volts, ""));
+	DAQmxErrChk(DAQmxCreateAOVoltageChan(_taskHandle1, "Dev1/ao0", "", -10.0, 10.0, DAQmx_Val_Volts, ""));
+	DAQmxErrChk(DAQmxCreateAOVoltageChan(_taskHandle2, "Dev1/ao1", "", -10.0, 10.0, DAQmx_Val_Volts, ""));
 
 	/*********************************************/
 	// DAQmx Start Code
@@ -66,12 +66,14 @@ void VoltageInput::volInput(float64 voltage_x, float64 voltage_y)
 
 	DAQmxErrChk(DAQmxWriteAnalogF64(_taskHandle2, 1, 1, 10.0, DAQmx_Val_GroupByChannel, _voltage_y, &written_2, NULL));
 
+
 Error:
 	if (DAQmxFailed(error))
 	{
-		printf("Voltage input time out!\n");
+		printf("Voltage initialize time out!");
 		DAQmxGetExtendedErrorInfo(errBuff, 2048);
 	}
+
 }
 
 void VoltageInput::volEnd()

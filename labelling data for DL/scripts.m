@@ -1,7 +1,7 @@
 % load and extract key frames
-path_root = 'D:/Daguang Li/tracking by deep learning/labelling data/';
+path_root = 'H:/tracking by deep learning/labelling data/';
 path_src = [path_root,'raw data/'];
-filename_in = '2022_01_15-16_15_22.avi';
+filename_in = '2022_04_06-20_34_14_1.avi';
 step_size = 500;
 KeyFrames = extractKeyFrames([path_src,filename_in],step_size);
 num_keyframes = size(KeyFrames,4);
@@ -23,7 +23,7 @@ result = detectFish(path_src,filename_in,num_keyframes,[path_src,path_templates]
 % path_templates, num_templates, shift_head2center are set in build_templates_set.m
 
 %% manually set the length from head to yolk
-shift_head2yolk = 21;
+shift_head2yolk = 18;
 % calculate the position of yolk
 for i = 1:num_keyframes
     result(i).yolk = result(i).head - shift_head2yolk*result(i).heading_vector;

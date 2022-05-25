@@ -1,9 +1,9 @@
 %% load, align and average all the pictures
 num_frames = 3;
-head = [387, 181; 382, 182; 387, 152];
-yolk = [378, 201; 401, 175; 386, 172];
-shift_head2center = [12,0];
-template_size = 50; % (145:194, 156:205)
+head = [382, 175; 384, 191; 379, 185];
+yolk = [390, 191; 383, 173; 395, 177];
+shift_head2center = [7,0];
+template_size = 48; % (145:194, 156:205)
 num_templates = 72;
 % path_src = 'raw data/';
 % filename_in = '2022_01_07-10_46_12.avi';

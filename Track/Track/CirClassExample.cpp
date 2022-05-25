@@ -103,7 +103,6 @@ BFTickRec T0, T1;
 
 //ConsolCoorRead
 ConsolCoorRead consoleread;
-int32 coordata[2];
 
 //VoltageInput
 VoltageInput voltage;
@@ -247,7 +246,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					{
 						bt.frameNum = cirHandle.FrameCount;
 						bt.imageDataBuffer = cirHandle.pBufData;
-						if (cirHandle.FrameCount % 100 == 0)
+						if (cirHandle.FrameCount % 10000 == 0)
 							cout << "current num:" << bt.frameNum << endl;
 					}
 					
@@ -340,6 +339,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			// clean up
 			consoleread.ConsolCoorStop();
 			consoleread.ConCoorEnd();
+			voltage.volInput(0, 0);
 			voltage.volEnd();
 		}
 		catch (BFException e)
@@ -552,16 +552,15 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					consoleread.ConCoorRead();
 					//printf("\n channel %u Current UpDown count: %u\n", 0, consoleread.coordata[0]);
 					//printf("\n channel %u Current UpDown count: %u\n", 1, consoleread.coordata[1]);
-					if (position_history.empty())// If position_history is empty, initialize it with the data of the first frame.
+					if (position_history.empty())// If position_history is empty（这里应该改为长度不等于fish_history_length，并先clear，这样在长度变化时可以调节！！！）, initialize it with the data of the first frame.
 						for (int i = 0; i <= fish_history_length; i++)
-							position_history.push_back(Point2d(coordata[0], coordata[1]));
+							position_history.push_back(Point2d(consoleread.coordata[0], -consoleread.coordata[1]));// Note the sign!!!
 					else// Push back the present data, and pop the data at the beginning
 					{
-						position_history.push_back(Point2d(coordata[0], coordata[1]));
+						position_history.push_back(Point2d(consoleread.coordata[0], -consoleread.coordata[1]));// Note the sign!!!
 						vector<Point2d>::iterator it = position_history.begin();
 						position_history.erase(it);
 					}
-					cout << "console coordinate: " << coordata[0] << ", " << coordata[1] << endl;
 
 					QueryPerformanceCounter(&timeEnd1);
 					//cout << frameCount << "    " << bt->frameNum << endl;
@@ -575,11 +574,8 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					QueryPerformanceCounter(&timeEnd3);
 
 					double elapsed_ConCoorRead = (timeEnd1.QuadPart - timeStart.QuadPart) / quadpart;
-					cout << "ConCoorRead elapsed time: " << elapsed_ConCoorRead << endl;
 					double elapsed_convertion = (timeEnd2.QuadPart - timeEnd1.QuadPart) / quadpart;
-					cout << "Image convertion elapsed time: " << elapsed_convertion << endl;
 					double elapsed_process = (timeEnd3.QuadPart - timeEnd2.QuadPart) / quadpart;
-					cout << "Image process elapsed time: " << elapsed_process << endl;
 
 					//imwrite("D:/tgd/Track-TEST/testImg/"+cv::format("%.4d", frameCount) + ".jpg", test2);
 					
@@ -588,11 +584,6 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					//if (frameCount % 10 == 0)
 					//	cout << "processed frame count: " << bt->frameNum <<endl;
 
-					if (DEBUG_FLAG)
-					{
-						cout << "head: " << outputVec[0] << endl;
-						cout << "yolk: " << outputVec[1] << endl;
-					}
 					
 					//save image to test img process
 					if (DEBUG_FLAG)
@@ -605,15 +596,19 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						imwrite("H:/track_in_c/testImg/" + cv::format("%.6d", frameCount) + ".jpg", test3);
 					}
 
-
-					int shift_head2yolk = int(sqrt((outputVec[0].x - outputVec[1].x)*(outputVec[0].x - outputVec[1].x) + (outputVec[0].y - outputVec[1].y)*(outputVec[0].y - outputVec[1].y)));
-					if (shift_head2yolk > max_shift_head2yolk || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
+					Point2d fish_direction = Point2d(outputVec[0].x - outputVec[1].x, outputVec[0].y - outputVec[1].y);
+					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
+					if (shift_head2yolk > max_shift_head2yolk || shift_head2yolk < 3 || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
 					{
 						cout << "fish detection error!" << endl;
-						continue;//Do nothing while fish detection error.
+						cout << "head: " << outputVec[0] << endl;
+						cout << "yolk: " << outputVec[1] << endl << endl;
+						voltage.volInput(0, 0);//Stop the stage while fish detection error.
+						continue;//Do nothing else while fish detection error.
 					}
+					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
 
-					if (fish_tr_history_c.empty())// If fish_tr_history_c is empty, initialize it with the data of the first frame.
+					if (fish_tr_history_c.empty())// If fish_tr_history_c is empty（这里应该改为长度不等于fish_history_length，并先clear，这样在长度变化时可以调节！！！）, initialize it with the data of the first frame.
 						for (int i = 0; i <= fish_history_length; i++)
 							fish_tr_history_c.push_back(Point2d(outputVec[0].x, outputVec[0].y));
 					else// Push back the present data, and pop the data at the beginning
@@ -623,19 +618,18 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						fish_tr_history_c.erase(it);
 					}
 
-					if (fish_direction_history_c.empty())// If fish_direction_history_c is empty, initialize it with the data of the first frame.
+					if (fish_direction_history_c.empty())// If fish_direction_history_c is empty（这里应该改为长度不等于fish_history_length，并先clear，这样在长度变化时可以调节！！！）, initialize it with the data of the first frame.
 						for (int i = 0; i <= fish_history_length; i++)
-							fish_direction_history_c.push_back(Point2d(outputVec[1].x, outputVec[1].y));
+							fish_direction_history_c.push_back(fish_direction);
 					else// Push back the present data, and pop the data at the beginning
 					{
-						fish_direction_history_c.push_back(Point2d(outputVec[1].x, outputVec[1].y));
+						fish_direction_history_c.push_back(fish_direction);
 						vector<Point2d>::iterator it = fish_direction_history_c.begin();
 						fish_direction_history_c.erase(it);
 					}
 
 					QueryPerformanceCounter(&timeEnd4);
 					double elapsed_history = (timeEnd4.QuadPart - timeEnd3.QuadPart) / quadpart;
-					cout << "History preparation elapsed time: " << elapsed_history << endl;
 
 					//MPC
 					Point2d c0 = MPC_main(command_history_length, predict_length, fish_history_length,
@@ -643,15 +637,14 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						scale_x, scale_y, theta, scale_x2, scale_y2, &dst_fish_position,
 						command_history, position_history, fish_tr_history_c, fish_direction_history_c);
 					voltage_x = c0.x;
-					voltage_y = c0.y;
-					cout << "voltage output: " << voltage_x << "," << voltage_y << endl;
+					voltage_y = -c0.y;// Note the sign!!!
 
 					QueryPerformanceCounter(&timeEnd5);
 					double elapsed_MPC = (timeEnd5.QuadPart - timeEnd4.QuadPart) / quadpart;
-					cout << "MPC elapsed time: " << elapsed_MPC << endl;
 
 					// Output the voltage
-					//voltage.volInput(voltage_x, voltage_y);
+					voltage.volInput(voltage_x, voltage_y);
+					//如果长度不等于command_history_length，应先clear，再重新初始化，这样在长度变化时可以调节！！！
 					// Push back the present data, and pop the data at the beginning
 					command_history.push_back(Point2d(voltage_x, voltage_y));
 					vector<Point2d>::iterator it = command_history.begin();
@@ -660,18 +653,32 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					// elapsed time
 					QueryPerformanceCounter(&timeEnd);
 					double elapsed = (timeEnd.QuadPart - timeStart.QuadPart) / quadpart;
-					cout << "elapsed time: " << elapsed << endl;
 					double elapsed_vector = (timeEnd.QuadPart - timeEnd5.QuadPart) / quadpart;
-					cout << "vector operation elapsed time: " << elapsed_vector << endl;
 
 					// frameCount_processed
 					frameCount_processed++;
-					cout << "frameCount processed: " << frameCount_processed << endl << endl;
 
+					// output
+					if (DEBUG_FLAG)
+					{
+						cout << "console coordinate: " << consoleread.coordata[0] << ", " << -consoleread.coordata[1] << endl;// Note the sign!!!
+						cout << "head: " << outputVec[0] << endl;
+						cout << "yolk: " << outputVec[1] << endl;
+						cout << "voltage output: " << voltage_x << "," << voltage_y << endl;
+						cout << "ConCoorRead elapsed time: " << elapsed_ConCoorRead << endl;
+						cout << "Image convertion elapsed time: " << elapsed_convertion << endl;
+						cout << "Image process elapsed time: " << elapsed_process << endl;
+						cout << "History preparation elapsed time: " << elapsed_history << endl;
+						cout << "MPC elapsed time: " << elapsed_MPC << endl;
+						cout << "vector operation elapsed time: " << elapsed_vector << endl;
+						cout << "elapsed time: " << elapsed << endl;
+						cout << "frameCount processed: " << frameCount_processed << endl << endl;
+					}
 				}
 			}
 			else if (TRTflag == 2)
 			{
+				cout << "frameCount processed: " << frameCount_processed << endl << endl;
 				cout << "break" << endl;
 				break;
 			}
