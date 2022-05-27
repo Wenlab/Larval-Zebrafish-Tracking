@@ -1,4 +1,4 @@
-function result = detectFish(path_src,filename,num_keyframes,path_templates,num_templates,shift_head2center)
+function result = detectFish(path_keyFrames,path_templates,shift_head2center)
     %% path_src: the path of source images
     %% filename: filename of the video where we extract key frames
     %% num_keyframes: number of key frames
@@ -7,25 +7,37 @@ function result = detectFish(path_src,filename,num_keyframes,path_templates,num_
     %% shift_head2center: a vector from the center of the template to the head of fish
 
     % load templates
-    prefix = [path_templates, filename];
-    prefix(end - 3:end) = [];
-    extension = 'png';
+    alltemplateName=dir(fullfile(path_templates,'*.png'));
     vec_templates = [];
-    norm_templates = zeros(num_templates,1);
+    num_templates=length(alltemplateName);
+    norm_templates = zeros(length(alltemplateName),1);
+    if(num_templates<=3)
+        disp('cannot find enough template')
+        result=[];
+        return 
+    end
+    
     for i = 1:num_templates
-        filename_template = [prefix , '_template' , num2str(i-1,'%03d') , '.' , extension];
+        filename_template = [path_templates,alltemplateName(i).name];
         template = imread(filename_template);
         vec_templates(:,i) = double(template(:));
         norm_templates(i) = norm(vec_templates(:,i));
     end
     [m0,n0] = size(template);
-
-    % template matching
-    prefix = [path_src, filename];
-    prefix(end - 3:end) = [];
-    extension = 'png';
-    for k = 1:num_keyframes
-        filename_keyframe = [prefix , '_' , num2str(k,'%05d') , '.' , extension];
+    
+    % template matching    
+    allkeyImgName=dir(fullfile(path_keyFrames,'*.png'));
+    num_keyframes=length(allkeyImgName);
+    disp(['find ',num2str(num_keyframes),' keyFrames....'])
+    for k=1:num_keyframes
+        result(k).center = [0,0];
+        result(k).heading_vector = [0,0];
+        result(k).head = [0,0] + result(k).heading_vector*norm(shift_head2center);
+    end
+    
+    parfor k = 1:num_keyframes
+        tic
+        filename_keyframe = [path_keyFrames,allkeyImgName(k).name];
         keyframe = imread(filename_keyframe);
         [m,n] = size(keyframe);
         result_k_l = zeros(m-m0+1,n-n0+1,num_keyframes);
@@ -46,5 +58,7 @@ function result = detectFish(path_src,filename,num_keyframes,path_templates,num_
         result(k).center = [x,y];
         result(k).heading_vector = [cos(theta),-sin(theta)];
         result(k).head = [x,y] + result(k).heading_vector*norm(shift_head2center);
+        disp([num2str(k),'/',num2str(num_keyframes)])
+        toc
     end
 end
