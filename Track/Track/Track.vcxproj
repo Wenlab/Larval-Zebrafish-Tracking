@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>C:\BitFlow SDK 6.5\Lib64;D:\kexin\TensorRT-7.2.2.3\lib;D:\kexin\opencv\build\x64\vc15\lib;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\lib\x64;D:\kexin\NIDAQ C\lib64\msvc;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\BitFlow SDK 6.5\Include;D:\kexin\TensorRT-7.2.2.3\samples\common;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include;D:\kexin\TensorRT-7.2.2.3\include;D:\kexin\opencv\build\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\BitFlow SDK 6.5\Include;D:\kexin\TensorRT-7.2.2.3\samples\common;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.1\include;D:\kexin\TensorRT-7.2.2.3\include;D:\kexin\opencv\build\include;D:\kexin\fltk-master;D:\kexin\fltk-master\build;D:\kexin\fltk-master\test;D:\kexin\fltk-master\build\test;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -132,9 +132,10 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>BFD.lib;BFDiskIO.lib;BFEr.lib;BFGTLUtil.lib;BFOS.lib;BFS.lib;Bid.lib;BufferInterface.lib;Cid.lib;clallserial.lib;clserbit.lib;DispSurf.lib;DispSurfOld.lib;Gn2d.lib;ImageView.lib;R2d.lib;R64d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;nvinfer.lib;nvinfer_plugin.lib;nvonnxparser.lib;nvparsers.lib;myelin64_1.lib;cudnn.lib;cublas.lib;cudart.lib;nvrtc.lib;opencv_world455.lib;imaq.lib;NIDAQmx.lib;niimaqdx.lib;nip2p.lib;nisyscfg.lib;nivision.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>D:\kexin\fltk-master\build\lib\Release\fltk.lib;gdiplus.lib;comctl32.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;BFD.lib;BFDiskIO.lib;BFEr.lib;BFGTLUtil.lib;BFOS.lib;BFS.lib;Bid.lib;BufferInterface.lib;Cid.lib;clallserial.lib;clserbit.lib;DispSurf.lib;DispSurfOld.lib;Gn2d.lib;ImageView.lib;R2d.lib;R64d.lib;odbc32.lib;odbccp32.lib;nvinfer.lib;nvinfer_plugin.lib;nvonnxparser.lib;nvparsers.lib;myelin64_1.lib;cudnn.lib;cublas.lib;cudart.lib;nvrtc.lib;opencv_world455.lib;imaq.lib;NIDAQmx.lib;niimaqdx.lib;nip2p.lib;nisyscfg.lib;nivision.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>16000000</StackReserveSize>
       <StackCommitSize>16000000</StackCommitSize>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -146,21 +147,21 @@
     <ClCompile Include="MPC_main.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="trackingControl.cpp" />
     <ClCompile Include="TRTruntime.cpp" />
     <ClCompile Include="voltagl_new.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CircClassExample.h" />
-    <ClInclude Include="circlass.h" />
     <ClInclude Include="ConsolCoorRead.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="MPC.h" />
     <ClInclude Include="MPC_main.h" />
-    <ClInclude Include="myCirclass.h" />
     <ClInclude Include="NIDAQmx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="trackingControl.h" />
     <ClInclude Include="TRTruntime.h" />
     <ClInclude Include="VoltageInput.h" />
   </ItemGroup>

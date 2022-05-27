@@ -61,6 +61,22 @@
 //MPC
 #include "MPC_main.h"
 
+//GUI
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Input.H>
+#include <FL/Fl_Output.H>
+#include <FL/Fl_Box.H>
+#include <FL/fl_draw.H>
+#include <FL/Fl_Shared_Image.H>
+#include <FL/Fl_JPEG_Image.H>
+#include <FL/Fl_Double_Window.H>
+#include <cstdlib>                   //for exit(0)
+#include <string.h>
+#include<sstream>
+#include"trackingControl.h"
+
 using namespace cv;
 using namespace std;
 
@@ -130,6 +146,9 @@ double scale_x2 = 1.0 / 10000.0;
 double scale_y2 = 1.0 / 12800.0;
 Point dst_fish_position = Point(160, 160);
 
+//GUI
+trackingParams* params;
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	int nRetCode = 0;
@@ -151,6 +170,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pErrorThread = NULL;
 		CWinThread* pFrameDoneThread = NULL;
 		CWinThread* pFrameIMGThread = NULL;
+
+		//GUI
+		params = new trackingParams;
 
 		// track class
 		bitflowTRTStru bt;
@@ -197,7 +219,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			fish_direction_history_c.clear();
 
 			// Initialize command_history with 0.
-			for (int i = 0; i <= command_history_length; i++)
+			for (int i = 0; i <= params->command_history_length; i++)
 				command_history.push_back(Point2d(0, 0));
 
 			// Create display surface to view sequence.	
@@ -223,21 +245,26 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pFrameDoneThread == BFNULL)
 				return 1;
 
+			board.cirControl(BISTART, BiAsync);
+			board.cirControl(BIPAUSE, BiAsync);//pause and manually control the stage when start the program
+
 			pFrameIMGThread = AfxBeginThread(TRTImageProcessThread, &bt, THREAD_PRIORITY_HIGHEST);
 			if (pFrameDoneThread == BFNULL)
 				return 1;
 			
 
-			printf("\nPress G (as in Go) to start Acquisition ");
-			printf("	Press S to Stop Acquisition \n");
-			printf("Press P to Pause				Press C to Continue\n");
-			printf("Press A to Abort\n");
-			printf("Press X to exit test\n\n");
+			//printf("\nPress G (as in Go) to start Acquisition ");
+			//printf("	Press S to Stop Acquisition \n");
+			//printf("Press P to Pause				Press C to Continue\n");
+			//printf("Press A to Abort\n");
+			//printf("Press X to exit test\n\n");
+			make_window(params);
+			Fl::run();
 
 			while (!endTest)
 			{
 				// Wait here for a keyboard stroke
-				while (!BFkbhit() && !endTest)
+				while (!params->flag_cb && !endTest)
 				{
 					if (PeekMessage(&Msg, BFNULL, 0, 0, PM_REMOVE))
 						DispatchMessage(&Msg);
@@ -251,8 +278,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					}
 					
 				}
+				params->flag_cb = false;//as a trigger, set false immediately after the waiting loop
 				if (!endTest)
-					ch = BFgetch();
+					//ch = BFgetch();
+					ch = params->action;
 				else
 				{
 					ch = 'X';
@@ -531,8 +560,23 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 
 			 //cout << TRTflag << endl;
 
-			if  (TRTflag == 0) 
+			if (TRTflag == 0)// manually control the stage
+			{
+				consoleread.ConCoorRead();
+				voltage.volInput(params->voltage_x, params->voltage_y);
+
+				// clear the history
+				command_history.clear();
+				position_history.clear();
+				fish_tr_history_c.clear();
+				fish_direction_history_c.clear();
+
+				// Initialize command_history with 0.
+				for (int i = 0; i <= params->command_history_length; i++)
+					command_history.push_back(Point2d(0, 0));
+
 				continue;
+			}
 			else if (TRTflag  == 1)
 			{
 				//
@@ -552,9 +596,12 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					consoleread.ConCoorRead();
 					//printf("\n channel %u Current UpDown count: %u\n", 0, consoleread.coordata[0]);
 					//printf("\n channel %u Current UpDown count: %u\n", 1, consoleread.coordata[1]);
-					if (position_history.empty())// If position_history is empty（这里应该改为长度不等于fish_history_length，并先clear，这样在长度变化时可以调节！！！）, initialize it with the data of the first frame.
-						for (int i = 0; i <= fish_history_length; i++)
+					if (position_history.size() != params->fish_history_length)// If the size of position_history is not equal to fish_history_length, initialize it with the data of the present frame.
+					{
+						position_history.clear();
+						for (int i = 0; i <= params->fish_history_length; i++)
 							position_history.push_back(Point2d(consoleread.coordata[0], -consoleread.coordata[1]));// Note the sign!!!
+					}
 					else// Push back the present data, and pop the data at the beginning
 					{
 						position_history.push_back(Point2d(consoleread.coordata[0], -consoleread.coordata[1]));// Note the sign!!!
@@ -598,7 +645,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 
 					Point2d fish_direction = Point2d(outputVec[0].x - outputVec[1].x, outputVec[0].y - outputVec[1].y);
 					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
-					if (shift_head2yolk > max_shift_head2yolk || shift_head2yolk < 3 || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
+					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
 					{
 						cout << "fish detection error!" << endl;
 						cout << "head: " << outputVec[0] << endl;
@@ -608,9 +655,12 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					}
 					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
 
-					if (fish_tr_history_c.empty())// If fish_tr_history_c is empty（这里应该改为长度不等于fish_history_length，并先clear，这样在长度变化时可以调节！！！）, initialize it with the data of the first frame.
-						for (int i = 0; i <= fish_history_length; i++)
+					if (fish_tr_history_c.size() != params->fish_history_length)// If the size of fish_tr_history_c is not equal to fish_history_length, initialize it with the data of the present frame.
+					{
+						fish_tr_history_c.clear();
+						for (int i = 0; i <= params->fish_history_length; i++)
 							fish_tr_history_c.push_back(Point2d(outputVec[0].x, outputVec[0].y));
+					}
 					else// Push back the present data, and pop the data at the beginning
 					{
 						fish_tr_history_c.push_back(Point2d(outputVec[0].x, outputVec[0].y));
@@ -618,9 +668,12 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						fish_tr_history_c.erase(it);
 					}
 
-					if (fish_direction_history_c.empty())// If fish_direction_history_c is empty（这里应该改为长度不等于fish_history_length，并先clear，这样在长度变化时可以调节！！！）, initialize it with the data of the first frame.
-						for (int i = 0; i <= fish_history_length; i++)
+					if (fish_direction_history_c.size() != params->fish_history_length)// If the size of fish_direction_history_c is not equal to fish_history_length, initialize it with the data of the present frame.
+					{
+						fish_direction_history_c.clear();
+						for (int i = 0; i <= params->fish_history_length; i++)
 							fish_direction_history_c.push_back(fish_direction);
+					}
 					else// Push back the present data, and pop the data at the beginning
 					{
 						fish_direction_history_c.push_back(fish_direction);
@@ -632,9 +685,11 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double elapsed_history = (timeEnd4.QuadPart - timeEnd3.QuadPart) / quadpart;
 
 					//MPC
-					Point2d c0 = MPC_main(command_history_length, predict_length, fish_history_length,
-						gammaX, gammaY, max_command, shift_head2yolk,
-						scale_x, scale_y, theta, scale_x2, scale_y2, &dst_fish_position,
+					dst_fish_position.x = params->dst_fish_position_x;
+					dst_fish_position.y = params->dst_fish_position_y;
+					Point2d c0 = MPC_main(params->command_history_length, params->predict_length, params->fish_history_length,
+						params->gammaX, params->gammaY, params->max_command, shift_head2yolk,
+						params->scale_x, params->scale_y, params->theta, params->scale_x2, params->scale_y2, &dst_fish_position,
 						command_history, position_history, fish_tr_history_c, fish_direction_history_c);
 					voltage_x = c0.x;
 					voltage_y = -c0.y;// Note the sign!!!
@@ -644,11 +699,19 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 
 					// Output the voltage
 					voltage.volInput(voltage_x, voltage_y);
-					//如果长度不等于command_history_length，应先clear，再重新初始化，这样在长度变化时可以调节！！！
-					// Push back the present data, and pop the data at the beginning
-					command_history.push_back(Point2d(voltage_x, voltage_y));
-					vector<Point2d>::iterator it = command_history.begin();
-					command_history.erase(it);
+
+					if (command_history.size() != params->command_history_length)// If the size of command_history is not equal to command_history_length, initialize it with 0.
+					{
+						command_history.clear();
+						for (int i = 0; i <= params->command_history_length; i++)
+							command_history.push_back(Point2d(0, 0));
+					}
+					else// Push back the present data, and pop the data at the beginning
+					{
+						command_history.push_back(Point2d(voltage_x, voltage_y));
+						vector<Point2d>::iterator it = command_history.begin();
+						command_history.erase(it);
+					}
 
 					// elapsed time
 					QueryPerformanceCounter(&timeEnd);

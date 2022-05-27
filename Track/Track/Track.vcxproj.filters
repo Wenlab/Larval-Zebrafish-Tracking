@@ -45,15 +45,12 @@
     <ClCompile Include="MPC_main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="trackingControl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CircClassExample.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="circlass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="myCirclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
@@ -84,6 +81,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MPC_main.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="trackingControl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
