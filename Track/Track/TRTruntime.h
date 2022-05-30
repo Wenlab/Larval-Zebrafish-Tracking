@@ -31,6 +31,8 @@ using std::vector;
 using cv::Mat;
 using cv::Point;
 
+#define IMG_SIZE 320
+
 class Logger : public nvinfer1::ILogger {
 public:
 	void log(Severity severity, const char *msg) override {

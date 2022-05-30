@@ -145,7 +145,7 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor)
 
 	
 	//cout << "1111" << endl;
-	float prob[1 * 2 * 320 * 320];   //如果更换模型 需要改这里的参数
+	float prob[1 * 2 * IMG_SIZE * IMG_SIZE];   //如果更换模型 需要改这里的参数
 	context->enqueueV2(bindings, stream, nullptr);
 	//cout << "infer succesesful!!" << endl;
 	cudaMemcpyAsync(prob, bindings[outputId],  batchSize * heatmapNum * imgH * imgW * sizeof(float),

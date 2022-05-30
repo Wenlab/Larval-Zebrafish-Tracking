@@ -20,7 +20,7 @@
 #include<sstream>
 #include <functional> // fucntion/bind
 
-#define panel_size 320
+#define panel_size 300
 #define maxVoltage 2
 
 struct trackingParams

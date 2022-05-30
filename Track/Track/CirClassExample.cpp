@@ -87,6 +87,7 @@ using namespace std;
 UINT WaitForBufferDone(LPVOID lpdwParam);
 UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
+UINT FrameGUIThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -111,7 +112,7 @@ struct bitflowTRTStru
 };
 
 //tgd
-TRTruntime trt(1, 320, 320, 2);
+//TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
 
 BFU32 	rv;
 BiCirHandle	cirHandle;
@@ -132,18 +133,18 @@ vector<Point2d> fish_tr_history_c;
 vector<Point2d> fish_direction_history_c;
 
 // parameters for MPC
-int command_history_length = 30;
-int predict_length = 6;
-int fish_history_length = 4;
-double gammaX = 0.03;
-double gammaY = 0.03;
-double max_command = 10.0;
-int max_shift_head2yolk = 29;
-double scale_x = 1.0 / 30.0;
-double scale_y = 1.0 / 30.0;
-double theta = atan(-0.043);
-double scale_x2 = 1.0 / 10000.0;
-double scale_y2 = 1.0 / 12800.0;
+//int command_history_length = 30;
+//int predict_length = 6;
+//int fish_history_length = 4;
+//double gammaX = 0.03;
+//double gammaY = 0.03;
+//double max_command = 10.0;
+//int max_shift_head2yolk = 29;
+//double scale_x = 1.0 / 30.0;
+//double scale_y = 1.0 / 30.0;
+//double theta = atan(-0.043);
+//double scale_x2 = 1.0 / 10000.0;
+//double scale_y2 = 1.0 / 12800.0;
 Point dst_fish_position = Point(160, 160);
 
 //GUI
@@ -170,6 +171,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pErrorThread = NULL;
 		CWinThread* pFrameDoneThread = NULL;
 		CWinThread* pFrameIMGThread = NULL;
+		CWinThread* pFrameGUI = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -198,8 +200,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 			//tensorRT
 			cout << "load model....." << endl;
-			TRTruntime trt(1, 320, 320, 2);
-			trt.DeserializeModel("trackKeyPointModel_0421_unet_320.trt");
+			TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
+			trt.DeserializeModel("trackKeyPointModel_0527_unet_320crop.trt");
 			trt.createInferenceContext();
 			cout << "Deserialize TRT model Done." << endl;
 			bt.trt = trt;
@@ -245,10 +247,14 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pFrameDoneThread == BFNULL)
 				return 1;
 
-			board.cirControl(BISTART, BiAsync);
-			board.cirControl(BIPAUSE, BiAsync);//pause and manually control the stage when start the program
+			//board.cirControl(BISTART, BiAsync);
+			//board.cirControl(BIPAUSE, BiAsync);//pause and manually control the stage when start the program
 
 			pFrameIMGThread = AfxBeginThread(TRTImageProcessThread, &bt, THREAD_PRIORITY_HIGHEST);
+			if (pFrameDoneThread == BFNULL)
+				return 1;
+
+			pFrameGUI = AfxBeginThread(FrameGUIThread, &params, THREAD_PRIORITY_HIGHEST);
 			if (pFrameDoneThread == BFNULL)
 				return 1;
 			
@@ -258,11 +264,14 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//printf("Press P to Pause				Press C to Continue\n");
 			//printf("Press A to Abort\n");
 			//printf("Press X to exit test\n\n");
-			make_window(params);
-			Fl::run();
 
+
+			//cout << "endTest: " << endTest << endl;
+			board.cirControl(BISTART, BiAsync); // start the board at the first time
 			while (!endTest)
 			{
+				//cout << "The main loop... " << endl;
+				
 				// Wait here for a keyboard stroke
 				while (!params->flag_cb && !endTest)
 				{
@@ -276,9 +285,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 						if (cirHandle.FrameCount % 10000 == 0)
 							cout << "current num:" << bt.frameNum << endl;
 					}
-					
+					//cout << "Waiting for trigger..." << endl;
 				}
 				params->flag_cb = false;//as a trigger, set false immediately after the waiting loop
+				cout << "trigger works!" << endl;
 				if (!endTest)
 					//ch = BFgetch();
 					ch = params->action;
@@ -292,33 +302,33 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 				switch (toupper(ch))
 				{
-				case 'G': // Start acquisition
-					TRTflag = 1;
-					board.cirControl(BISTART, BiAsync);
-					cout << "Circular Acquisition Started." << endl;
-					break;
+				//case 'G': // Start acquisition
+				//	TRTflag = 1;
+				//	board.cirControl(BISTART, BiAsync);
+				//	cout << "Circular Acquisition Started." << endl;
+				//	break;
 
 				case 'P':// Pause acquisition
 					TRTflag = 0;
-					board.cirControl(BIPAUSE, BiAsync);
+					//board.cirControl(BIPAUSE, BiAsync);
 					cout << "Circular Acquisition Paused." << endl;
 					break;
 
 				case 'C':// Resume acquisition
 					TRTflag = 1;
-					board.cirControl(BIRESUME, BiAsync);
+					//board.cirControl(BIRESUME, BiAsync);
 					cout << "Circular Acquisition Resumed." << endl;
 					break;
 
-				case 'S':// Stop acquisition
-					TRTflag = 2;
-					board.cirControl(BISTOP, BiAsync);
-					break;
+				//case 'S':// Stop acquisition
+				//	TRTflag = 2;
+				//	board.cirControl(BISTOP, BiAsync);
+				//	break;
 
-				case 'A':// Abort acquisition
-					TRTflag = 2;
-					board.cirControl(BIABORT, BiAsync);
-					break;
+				//case 'A':// Abort acquisition
+				//	TRTflag = 2;
+				//	board.cirControl(BIABORT, BiAsync);
+				//	break;
 
 				case 'X':// Exit application
 					TRTflag = 2;
@@ -535,19 +545,27 @@ UINT CirErrorThread(LPVOID lpdwParam)
 	return 0;
 }
 
+UINT FrameGUIThread(LPVOID lpdwParam)
+{
+	//trackingParams* params = (trackingParams*)lpdwParam;
+	make_window(params);
+	cout << "Start Fl::run()... " << endl;
+	Fl::run();
 
+	return 0;
+}
 
 UINT TRTImageProcessThread(LPVOID lpdwParam)
 {
-	bitflowTRTStru* bt = (bitflowTRTStru*)lpdwParam;;
+	bitflowTRTStru* bt = (bitflowTRTStru*)lpdwParam;
 	//CircularInterface* board = (CircularInterface*)lpdwParam;
 
 	cout << "start TRT model process..." << endl;
 	BFU32 frameCount = -2;
 	BFU32 frameCount_processed = 0;
 
-	Mat test(cv::Size(320, 320), CV_8UC1);
-	Mat test2(cv::Size(320, 320), CV_32FC1);
+	Mat test(cv::Size(IMG_SIZE, IMG_SIZE), CV_8UC1);
+	Mat test2(cv::Size(IMG_SIZE, IMG_SIZE), CV_32FC1);
 
 	try
 	{
@@ -563,6 +581,10 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			if (TRTflag == 0)// manually control the stage
 			{
 				consoleread.ConCoorRead();
+				//if (params->voltage_x != 0)
+				//{
+				//	cout << "volInput: " << params->voltage_x << ", " << params->voltage_y << endl;
+				//}
 				voltage.volInput(params->voltage_x, params->voltage_y);
 
 				// clear the history
@@ -581,6 +603,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			{
 				//
 				// cout << "1:" << bt->frameNum << endl;
+				//cout << "Tracking branch begins." << endl;
 				if (frameCount != bt->frameNum && bt->imageDataBuffer != NULL)
 				{
 					// elapsed time
@@ -689,7 +712,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					dst_fish_position.y = params->dst_fish_position_y;
 					Point2d c0 = MPC_main(params->command_history_length, params->predict_length, params->fish_history_length,
 						params->gammaX, params->gammaY, params->max_command, shift_head2yolk,
-						params->scale_x, params->scale_y, params->theta, params->scale_x2, params->scale_y2, &dst_fish_position,
+						1.0/params->scale_x, 1.0/params->scale_y, atan(params->theta), 1.0/(params->scale_x2), 1.0/(params->scale_y2), &dst_fish_position,
 						command_history, position_history, fish_tr_history_c, fish_direction_history_c);
 					voltage_x = c0.x;
 					voltage_y = -c0.y;// Note the sign!!!

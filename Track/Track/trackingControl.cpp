@@ -72,9 +72,11 @@ int voltageControlPanel::handle(int event)
 			y = Fl::event_y();
 			g_voltage_x = (float(x) - x_bias - panel_size / 2) / panel_size * maxVoltage * 2;
 			g_voltage_y = (float(y) - y_bias - panel_size / 2) / panel_size * maxVoltage * 2;
-			cout << g_voltage_y << "   " << g_voltage_x << endl;
+			//cout << g_voltage_y << "   " << g_voltage_x << endl;
 			g_params->voltage_x = g_voltage_x;
 			g_params->voltage_y = g_voltage_y;
+
+			break;
 
 			//cout << g_params->command_history_length << endl;
 		default:
@@ -224,19 +226,19 @@ void apply_cb(Fl_Widget* o, void *data)
 	params->max_shift_head2yolk = atof(max_shift_head2yolk->value());
 
 	Fl_Input* scale_x = (Fl_Input*)b->parent()->child(9);
-	params->scale_x = 1 / atof(scale_x->value());
+	params->scale_x = atof(scale_x->value());
 
 	Fl_Input* scale_y = (Fl_Input*)b->parent()->child(10);
-	params->scale_y = 1 / atof(scale_y->value());
+	params->scale_y = atof(scale_y->value());
 
 	Fl_Input* theta = (Fl_Input*)b->parent()->child(11);
-	params->theta = atan(atof(scale_x->value()));
+	params->theta = atof(theta->value());
 
 	Fl_Input* scale_x2 = (Fl_Input*)b->parent()->child(12);
-	params->scale_x2 = 1 / atof(scale_x2->value());
+	params->scale_x2 = atof(scale_x2->value());
 
 	Fl_Input* scale_y2 = (Fl_Input*)b->parent()->child(13);
-	params->scale_y2 = 1 / atof(scale_y2->value());
+	params->scale_y2 = atof(scale_y2->value());
 
 	Fl_Input* dst_fish_position_x = (Fl_Input*)b->parent()->child(14);
 	params->dst_fish_position_x = atof(dst_fish_position_x->value());
@@ -245,19 +247,23 @@ void apply_cb(Fl_Widget* o, void *data)
 	params->dst_fish_position_y = atof(dst_fish_position_y->value());
 
 	//std::cout << params->voltage_x << std::endl;
-	//std::cout << predict_length_value << std::endl;
-	//std::cout << fish_history_length_value << std::endl;
-	//std::cout << gammaX_value << std::endl;
-	//std::cout << gammaY_value << std::endl;
-	//std::cout << max_command_value << std::endl;
-	//std::cout << max_shift_head2yolk_value << std::endl;
-	//std::cout << scale_x_value << std::endl;
-	//std::cout << scale_y_value << std::endl;
-	//std::cout << theta_value << std::endl;
-	//std::cout << scale_x2_value << std::endl;
-	//std::cout << scale_y2_value << std::endl;
-	//std::cout << dst_fish_position_x_value << std::endl;
-	//std::cout << dst_fish_position_y_value << std::endl;
+	//std::cout << params->command_history_length << std::endl;
+	//std::cout << params->predict_length << std::endl;
+	//std::cout << params->fish_history_length << std::endl;
+	//std::cout << params->gammaX<< std::endl;
+	//std::cout << params->gammaY << std::endl;
+	//std::cout << params->max_command << std::endl;
+	//std::cout << params->max_shift_head2yolk << std::endl;
+	//std::cout << params->scale_x << std::endl;
+	//std::cout << params->scale_y << std::endl;
+	//std::cout << params->theta << std::endl;
+	//std::cout << params->scale_x2 << std::endl;
+	//std::cout << params->scale_y2 << std::endl;
+	//std::cout << params->dst_fish_position_x << std::endl;
+	//std::cout << params->dst_fish_position_y << std::endl;
+
+	//cout << "apply_cb g_params voltage: " << g_params->voltage_x << ", " << g_params->voltage_y << endl;
+	//cout << "apply_cb params voltage: " << params->voltage_x << ", " << params->voltage_y << endl;
 }
 
 
