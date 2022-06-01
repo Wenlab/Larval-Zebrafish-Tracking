@@ -74,20 +74,29 @@
 #include <FL/Fl_Double_Window.H>
 #include <cstdlib>                   //for exit(0)
 #include <string.h>
-#include<sstream>
-#include"trackingControl.h"
+#include <sstream>
+#include "trackingControl.h"
 
 using namespace cv;
 using namespace std;
 
 #define DEBUG_FLAG 0
 
+// TCP
+#define TRACK_SERVER_PORT 11000
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <WinSock2.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#pragma comment(lib, "ws2_32.lib")
 
 // Threads
 UINT WaitForBufferDone(LPVOID lpdwParam);
 UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
+UINT RecordCoorThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -172,6 +181,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameDoneThread = NULL;
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
+		CWinThread* pRecordCoorThread = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -251,11 +261,15 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//board.cirControl(BIPAUSE, BiAsync);//pause and manually control the stage when start the program
 
 			pFrameIMGThread = AfxBeginThread(TRTImageProcessThread, &bt, THREAD_PRIORITY_HIGHEST);
-			if (pFrameDoneThread == BFNULL)
+			if (pFrameIMGThread == BFNULL)
 				return 1;
 
 			pFrameGUI = AfxBeginThread(FrameGUIThread, &params, THREAD_PRIORITY_HIGHEST);
-			if (pFrameDoneThread == BFNULL)
+			if (pFrameGUI == BFNULL)
+				return 1;
+
+			pRecordCoorThread = AfxBeginThread(RecordCoorThread, &params, THREAD_PRIORITY_HIGHEST);
+			if (pRecordCoorThread == BFNULL)
 				return 1;
 			
 
@@ -410,6 +424,24 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Sleep(10);
 		}
 
+		while (GetExitCodeThread(pFrameIMGThread->m_hThread, &exitCode) &&
+			exitCode == STILL_ACTIVE)
+		{
+			Sleep(10);
+		}
+
+		while (GetExitCodeThread(pFrameGUI->m_hThread, &exitCode) &&
+			exitCode == STILL_ACTIVE)
+		{
+			Sleep(10);
+		}
+
+		while (GetExitCodeThread(pRecordCoorThread->m_hThread, &exitCode) &&
+			exitCode == STILL_ACTIVE)
+		{
+			Sleep(10);
+		}
+
 	}
 
 	return nRetCode;
@@ -551,6 +583,82 @@ UINT FrameGUIThread(LPVOID lpdwParam)
 	make_window(params);
 	cout << "Start Fl::run()... " << endl;
 	Fl::run();
+
+	return 0;
+}
+
+UINT RecordCoorThread(LPVOID lpdwParam)
+{
+	//加载套接字
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		printf("Failed to load Winsock");
+		return 1;
+	}
+
+	//创建用于监听的套接字
+	SOCKET sockSrv = socket(AF_INET, SOCK_STREAM, 0);
+
+	SOCKADDR_IN addrSrv;
+	addrSrv.sin_family = AF_INET;
+	addrSrv.sin_port = htons(TRACK_SERVER_PORT); //1024以上的端口号
+	addrSrv.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+
+	if (::bind(sockSrv, (LPSOCKADDR)&addrSrv, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {//为了区别于std::bind，加了个::。
+		printf("Failed bind:%d\n", WSAGetLastError());
+		return 1;
+	}
+
+	if (listen(sockSrv, 10) == SOCKET_ERROR) {
+		printf("Listen failed:%d", WSAGetLastError());
+		return 1;
+	}
+
+	SOCKADDR_IN addrClient;
+	int len = sizeof(SOCKADDR);
+
+	//等待客户请求到来    
+	SOCKET sockConn = accept(sockSrv, (SOCKADDR *)&addrClient, &len);
+	if (sockConn == SOCKET_ERROR) {
+		printf("Accept failed:%d", WSAGetLastError());
+		//break;
+	}
+
+	printf("Accept client IP:[%s]\n", inet_ntoa(addrClient.sin_addr));
+
+	bool flag_client_closed = false;
+	char recvBuf[100];
+	int i;
+	ofstream output;
+	time_t nowtime;
+	nowtime = time(NULL);
+	struct tm *local;
+	local = localtime(&nowtime);
+	char char_time[100];
+	sprintf(char_time, "H:\\stage_position\\Stage_postion%d_%d_%d-%d_%d_%d.txt", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+	cout << "file path: " << char_time << endl;
+	output.open(char_time, ios::out | ios::app);
+	cout << "File openning succeeds!\n";
+	//接收数据（帧号）并存储光栅尺读数
+	while (!endTest && !flag_client_closed)
+	{
+		//memset(recvBuf, 0, sizeof(recvBuf));
+		if (recv(sockConn, recvBuf, sizeof(recvBuf), 0)<=0)//receive the trigger
+		{
+			flag_client_closed = true;//whether the client socket is closed
+		}
+		//cout << "recvBuf: " << recvBuf << endl;
+		i = atoi(recvBuf);
+		output << i << " " << consoleread.coordata[0] << " " << -consoleread.coordata[1] << endl;//record the frame number and coordinates
+
+		//cout << i << " " << consoleread.coordata[0] << " " << -consoleread.coordata[1] << endl;
+	}
+	output.close();
+
+	closesocket(sockConn);
+	closesocket(sockSrv);
+	WSACleanup();
 
 	return 0;
 }
