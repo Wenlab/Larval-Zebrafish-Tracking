@@ -73,7 +73,7 @@ int voltageControlPanel::handle(int event)
 			g_voltage_x = (float(x) - x_bias - panel_size / 2) / panel_size * maxVoltage * 2;
 			g_voltage_y = (float(y) - y_bias - panel_size / 2) / panel_size * maxVoltage * 2;
 			//cout << g_voltage_y << "   " << g_voltage_x << endl;
-			g_params->voltage_x = g_voltage_x;
+			g_params->voltage_x = -g_voltage_x;  //将X轴反过来
 			g_params->voltage_y = g_voltage_y;
 
 			break;
