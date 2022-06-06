@@ -74,8 +74,8 @@
 #include <FL/Fl_Double_Window.H>
 #include <cstdlib>                   //for exit(0)
 #include <string.h>
-#include<sstream>
-#include"trackingControl.h"
+#include <sstream>
+#include "trackingControl.h"
 
 using namespace cv;
 using namespace std;
@@ -83,11 +83,12 @@ using namespace std;
 #define DEBUG_FLAG 0
 
 // TCP
-#define BLITZ_SERVER_PORT 11000
-#define BLITZ_SERVER_IP "192.168.1.27"
+#define TRACK_SERVER_PORT 11000
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #pragma comment(lib, "ws2_32.lib")
 
 // Threads
@@ -95,7 +96,7 @@ UINT WaitForBufferDone(LPVOID lpdwParam);
 UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
-UINT SendCoorThread(LPVOID lpdwParam);
+UINT RecordCoorThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -118,6 +119,7 @@ struct bitflowTRTStru
 	{
 	}
 };
+Mat test;
 
 //tgd
 //TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
@@ -180,7 +182,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameDoneThread = NULL;
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
-		CWinThread* pSendCoorThread = NULL;
+		CWinThread* pRecordCoorThread = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -267,8 +269,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pFrameGUI == BFNULL)
 				return 1;
 
-			pSendCoorThread = AfxBeginThread(SendCoorThread, &params, THREAD_PRIORITY_HIGHEST);
-			if (pSendCoorThread == BFNULL)
+			pRecordCoorThread = AfxBeginThread(RecordCoorThread, &params, THREAD_PRIORITY_HIGHEST);
+			if (pRecordCoorThread == BFNULL)
 				return 1;
 			
 
@@ -435,7 +437,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Sleep(10);
 		}
 
-		while (GetExitCodeThread(pSendCoorThread->m_hThread, &exitCode) &&
+		while (GetExitCodeThread(pRecordCoorThread->m_hThread, &exitCode) &&
 			exitCode == STILL_ACTIVE)
 		{
 			Sleep(10);
@@ -586,8 +588,10 @@ UINT FrameGUIThread(LPVOID lpdwParam)
 	return 0;
 }
 
-UINT SendCoorThread(LPVOID lpdwParam)
+UINT RecordCoorThread(LPVOID lpdwParam)
 {
+	Mat test4;
+
 	//加载套接字
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -596,60 +600,81 @@ UINT SendCoorThread(LPVOID lpdwParam)
 		return 1;
 	}
 
+	//创建用于监听的套接字
+	SOCKET sockSrv = socket(AF_INET, SOCK_STREAM, 0);
+
 	SOCKADDR_IN addrSrv;
 	addrSrv.sin_family = AF_INET;
-	addrSrv.sin_port = htons(BLITZ_SERVER_PORT);
-	addrSrv.sin_addr.S_un.S_addr = inet_addr(BLITZ_SERVER_IP);
+	addrSrv.sin_port = htons(TRACK_SERVER_PORT); //1024以上的端口号
+	addrSrv.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 
-	//创建套接字
-	SOCKET sockClient = socket(AF_INET, SOCK_STREAM, 0);
-	if (SOCKET_ERROR == sockClient) {
-		printf("Socket() error:%d", WSAGetLastError());
+	if (::bind(sockSrv, (LPSOCKADDR)&addrSrv, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {//为了区别于std::bind，加了个::。
+		printf("Failed bind:%d\n", WSAGetLastError());
 		return 1;
 	}
 
-	//向服务器发出连接请求
-	if (connect(sockClient, (struct  sockaddr*)&addrSrv, sizeof(addrSrv)) == INVALID_SOCKET) {
-		printf("Connect failed:%d", WSAGetLastError());
+	if (listen(sockSrv, 10) == SOCKET_ERROR) {
+		printf("Listen failed:%d", WSAGetLastError());
 		return 1;
 	}
 
-	//发送数据
-	char buffSend[100];
-	char buffRecv[100];
-	while (!endTest)
+	SOCKADDR_IN addrClient;
+	int len = sizeof(SOCKADDR);
+
+	//等待客户请求到来    
+	SOCKET sockConn = accept(sockSrv, (SOCKADDR *)&addrClient, &len);
+	if (sockConn == SOCKET_ERROR) {
+		printf("Accept failed:%d", WSAGetLastError());
+		//break;
+	}
+
+	printf("Accept client IP:[%s]\n", inet_ntoa(addrClient.sin_addr));
+
+	bool flag_client_closed = false;
+	char recvBuf[100];
+	int i;
+	ofstream output;
+	time_t nowtime;
+	nowtime = time(NULL);
+	struct tm *local;
+	local = localtime(&nowtime);
+	char char_time[100];
+	char path_image[100];
+	sprintf(char_time, "H:\\stage_position\\Stage_postion%d_%d_%d-%d_%d_%d.txt", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+	sprintf(path_image, "H:\\track_in_c\\%d_%d_%d-%d_%d_%d\\", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+	cout << "file path: " << char_time << endl;
+	output.open(char_time, ios::out | ios::app);
+	cout << "File(stage position) openning succeeds!\n";
+	mkdir(path_image);
+	cout << "Mkdir for image recording succeeds!\n";
+	//接收数据（帧号）并存储光栅尺读数
+	while (!endTest && !flag_client_closed)
 	{
-		//char a_char[7];
-		//char b_char[7];
-		//memset(buffSend, '0', 12);
-		//buffSend[12] = '\0';
-		//
-		//_itoa_s(abs(consoleread.coordata[0]), a_char, 7, 10);
-		//_itoa_s(abs(consoleread.coordata[1]), b_char, 7, 10);
-
-		//for (int i = 6 - std::strlen(a_char); i < 6; i++) {
-		//	buffSend[i] = a_char[i + std::strlen(a_char) - 6];
-		//}
-		//for (int i = 12 - std::strlen(b_char); i < 12; i++) {
-		//	buffSend[i] = b_char[i + std::strlen(b_char) - 12];
-		//}
-
-		recv(sockClient, buffRecv, sizeof(buffRecv), 0);// Receive a trigger, then send the coordinates.
-		sprintf(buffSend, "%09d,%09d;", consoleread.coordata[0], -consoleread.coordata[1]);
-		send(sockClient, buffSend, sizeof(buffSend), 0);
-		//printf("%d", strlen(buffSend) + 1);
-
-		if (DEBUG_FLAG)
+		//memset(recvBuf, 0, sizeof(recvBuf));
+		if (recv(sockConn, recvBuf, sizeof(recvBuf), 0)<=0)//receive the trigger
 		{
-			//cout << consoleread.coordata[0] << endl;
-			//cout << a_char << endl;
-			cout << buffSend << endl;
+			flag_client_closed = true;//whether the client socket is closed
+		}
+		//cout << "recvBuf: " << recvBuf << endl;
+		i = atoi(recvBuf);
+		output << i << ", " << "x: " << consoleread.coordata[0] << ", " << "y: " << -consoleread.coordata[1];//record the frame number and coordinates
+		output << ", detection: " << params->fish_detection << ", head: " << params->head << ", yolk: " << params->yolk << endl;
+
+		//record the images
+		if (i % 1 == 0)
+		{
+			test4 = test.clone();
+			//cv::circle(test4, params->head, 6, 128, 2);
+			//cv::circle(test4, params->yolk, 3, 128, 2);
+			imwrite(path_image + cv::format("%.6d", i) + ".jpg", test4);
 		}
 
+		//cout << i << " " << consoleread.coordata[0] << " " << -consoleread.coordata[1] << endl;
 	}
-	
-	//关闭套接字
-	closesocket(sockClient);
+	output.close();
+
+	closesocket(sockConn);
+	closesocket(sockSrv);
 	WSACleanup();
 
 	return 0;
@@ -664,8 +689,10 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 	BFU32 frameCount = -2;
 	BFU32 frameCount_processed = 0;
 
-	Mat test(cv::Size(IMG_SIZE, IMG_SIZE), CV_8UC1);
+	
+	test = Mat(cv::Size(IMG_SIZE, IMG_SIZE), CV_8UC1);
 	Mat test2(cv::Size(IMG_SIZE, IMG_SIZE), CV_32FC1);
+	Mat test3;
 
 	try
 	{
@@ -681,10 +708,6 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			if (TRTflag == 0)// manually control the stage
 			{
 				consoleread.ConCoorRead();
-				if (DEBUG_FLAG)
-				{
-					cout << "coordinates: " << consoleread.coordata[0] << "," << -consoleread.coordata[1] << endl;
-				}
 				//if (params->voltage_x != 0)
 				//{
 				//	cout << "volInput: " << params->voltage_x << ", " << params->voltage_y << endl;
@@ -747,6 +770,9 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					bt->trt.launchInference(test2, outputVec);
 					QueryPerformanceCounter(&timeEnd3);
 
+					params->head = outputVec[0];
+					params->yolk = outputVec[1];
+
 					double elapsed_ConCoorRead = (timeEnd1.QuadPart - timeStart.QuadPart) / quadpart;
 					double elapsed_convertion = (timeEnd2.QuadPart - timeEnd1.QuadPart) / quadpart;
 					double elapsed_process = (timeEnd3.QuadPart - timeEnd2.QuadPart) / quadpart;
@@ -762,7 +788,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					//save image to test img process
 					if (DEBUG_FLAG)
 					{
-						Mat test3 = test.clone();
+						test3 = test.clone();
 						for (int i = 0; i < outputVec.size(); i++)
 						{
 							cv::circle(test3, outputVec[i], 3, 128, 2);
@@ -774,11 +800,16 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
 					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
 					{
+						params->fish_detection = false;
 						cout << "fish detection error!" << endl;
 						cout << "head: " << outputVec[0] << endl;
 						cout << "yolk: " << outputVec[1] << endl << endl;
 						voltage.volInput(0, 0);//Stop the stage while fish detection error.
 						continue;//Do nothing else while fish detection error.
+					}
+					else
+					{
+						params->fish_detection = true;
 					}
 					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
 
@@ -870,6 +901,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			{
 				cout << "frameCount processed: " << frameCount_processed << endl << endl;
 				cout << "break" << endl;
+				exit(0);
 				break;
 			}
 		}

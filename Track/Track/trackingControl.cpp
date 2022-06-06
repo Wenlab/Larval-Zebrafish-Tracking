@@ -301,5 +301,5 @@ void close_cb(Fl_Widget* o, void*data)
 	g_params = params;
 	params->flag_cb = true;
 	params->action = 'X';//To ensure that action and flag_cb are updated simultaneously, maybe we should use some sychronization.
-	exit(0);
+	//exit(0);
 }

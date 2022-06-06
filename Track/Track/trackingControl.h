@@ -17,8 +17,14 @@
 #include <cstdlib>                   //for exit(0)
 #include <string.h>
 #include <iostream>
-#include<sstream>
+#include <sstream>
 #include <functional> // fucntion/bind
+
+//opencv
+#include<opencv2/highgui/highgui.hpp>
+#include<opencv2/opencv.hpp>
+#include<opencv2/imgcodecs/imgcodecs.hpp>
+#include<opencv2/imgproc.hpp>
 
 #define panel_size 300
 #define maxVoltage 2
@@ -47,6 +53,10 @@ struct trackingParams
 	float voltage_x;
 	float voltage_y;
 
+	cv::Point head;
+	cv::Point yolk;
+	bool fish_detection;
+
 	trackingParams()
 	{
 		this->command_history_length = 30.0;
@@ -55,7 +65,7 @@ struct trackingParams
 		this->gammaX = 0.03;
 		this->gammaY = 0.03;
 		this->max_command = 10.0;
-		this->max_shift_head2yolk = 45.0;
+		this->max_shift_head2yolk = 42.0;
 		this->scale_x = 30.0;
 		this->scale_y = 30.0;
 		this->theta = -0.043;
@@ -70,6 +80,10 @@ struct trackingParams
 
 		this->voltage_x = 0.0;
 		this->voltage_y = 0.0;
+
+		this->head = cv::Point(0, 0);
+		this->yolk = cv::Point(0, 0);
+		this->fish_detection = false;
 	}
 }; 
 //将通过鼠标获取的voltage的值传入params结构体
