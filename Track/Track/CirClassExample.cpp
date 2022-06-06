@@ -74,8 +74,8 @@
 #include <FL/Fl_Double_Window.H>
 #include <cstdlib>                   //for exit(0)
 #include <string.h>
-#include <sstream>
-#include "trackingControl.h"
+#include<sstream>
+#include"trackingControl.h"
 
 using namespace cv;
 using namespace std;
@@ -83,12 +83,11 @@ using namespace std;
 #define DEBUG_FLAG 0
 
 // TCP
-#define TRACK_SERVER_PORT 11000
+#define BLITZ_SERVER_PORT 11000
+#define BLITZ_SERVER_IP "192.168.1.27"
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #pragma comment(lib, "ws2_32.lib")
 
 // Threads
@@ -96,7 +95,7 @@ UINT WaitForBufferDone(LPVOID lpdwParam);
 UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
-UINT RecordCoorThread(LPVOID lpdwParam);
+UINT SendCoorThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -181,7 +180,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameDoneThread = NULL;
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
-		CWinThread* pRecordCoorThread = NULL;
+		CWinThread* pSendCoorThread = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -211,7 +210,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//tensorRT
 			cout << "load model....." << endl;
 			TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
-			trt.DeserializeModel("trackKeyPointModel_0527_unet_320crop.trt");
+			trt.DeserializeModel("trackKeyPointModel_0606_unet_320crop.trt");
 			trt.createInferenceContext();
 			cout << "Deserialize TRT model Done." << endl;
 			bt.trt = trt;
@@ -268,8 +267,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pFrameGUI == BFNULL)
 				return 1;
 
-			pRecordCoorThread = AfxBeginThread(RecordCoorThread, &params, THREAD_PRIORITY_HIGHEST);
-			if (pRecordCoorThread == BFNULL)
+			pSendCoorThread = AfxBeginThread(SendCoorThread, &params, THREAD_PRIORITY_HIGHEST);
+			if (pSendCoorThread == BFNULL)
 				return 1;
 			
 
@@ -436,7 +435,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Sleep(10);
 		}
 
-		while (GetExitCodeThread(pRecordCoorThread->m_hThread, &exitCode) &&
+		while (GetExitCodeThread(pSendCoorThread->m_hThread, &exitCode) &&
 			exitCode == STILL_ACTIVE)
 		{
 			Sleep(10);
@@ -587,7 +586,7 @@ UINT FrameGUIThread(LPVOID lpdwParam)
 	return 0;
 }
 
-UINT RecordCoorThread(LPVOID lpdwParam)
+UINT SendCoorThread(LPVOID lpdwParam)
 {
 	//加载套接字
 	WSADATA wsaData;
@@ -597,67 +596,60 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 		return 1;
 	}
 
-	//创建用于监听的套接字
-	SOCKET sockSrv = socket(AF_INET, SOCK_STREAM, 0);
-
 	SOCKADDR_IN addrSrv;
 	addrSrv.sin_family = AF_INET;
-	addrSrv.sin_port = htons(TRACK_SERVER_PORT); //1024以上的端口号
-	addrSrv.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+	addrSrv.sin_port = htons(BLITZ_SERVER_PORT);
+	addrSrv.sin_addr.S_un.S_addr = inet_addr(BLITZ_SERVER_IP);
 
-	if (::bind(sockSrv, (LPSOCKADDR)&addrSrv, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {//为了区别于std::bind，加了个::。
-		printf("Failed bind:%d\n", WSAGetLastError());
+	//创建套接字
+	SOCKET sockClient = socket(AF_INET, SOCK_STREAM, 0);
+	if (SOCKET_ERROR == sockClient) {
+		printf("Socket() error:%d", WSAGetLastError());
 		return 1;
 	}
 
-	if (listen(sockSrv, 10) == SOCKET_ERROR) {
-		printf("Listen failed:%d", WSAGetLastError());
+	//向服务器发出连接请求
+	if (connect(sockClient, (struct  sockaddr*)&addrSrv, sizeof(addrSrv)) == INVALID_SOCKET) {
+		printf("Connect failed:%d", WSAGetLastError());
 		return 1;
 	}
 
-	SOCKADDR_IN addrClient;
-	int len = sizeof(SOCKADDR);
-
-	//等待客户请求到来    
-	SOCKET sockConn = accept(sockSrv, (SOCKADDR *)&addrClient, &len);
-	if (sockConn == SOCKET_ERROR) {
-		printf("Accept failed:%d", WSAGetLastError());
-		//break;
-	}
-
-	printf("Accept client IP:[%s]\n", inet_ntoa(addrClient.sin_addr));
-
-	bool flag_client_closed = false;
-	char recvBuf[100];
-	int i;
-	ofstream output;
-	time_t nowtime;
-	nowtime = time(NULL);
-	struct tm *local;
-	local = localtime(&nowtime);
-	char char_time[100];
-	sprintf(char_time, "H:\\stage_position\\Stage_postion%d_%d_%d-%d_%d_%d.txt", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
-	cout << "file path: " << char_time << endl;
-	output.open(char_time, ios::out | ios::app);
-	cout << "File openning succeeds!\n";
-	//接收数据（帧号）并存储光栅尺读数
-	while (!endTest && !flag_client_closed)
+	//发送数据
+	char buffSend[100];
+	char buffRecv[100];
+	while (!endTest)
 	{
-		//memset(recvBuf, 0, sizeof(recvBuf));
-		if (recv(sockConn, recvBuf, sizeof(recvBuf), 0)<=0)//receive the trigger
+		//char a_char[7];
+		//char b_char[7];
+		//memset(buffSend, '0', 12);
+		//buffSend[12] = '\0';
+		//
+		//_itoa_s(abs(consoleread.coordata[0]), a_char, 7, 10);
+		//_itoa_s(abs(consoleread.coordata[1]), b_char, 7, 10);
+
+		//for (int i = 6 - std::strlen(a_char); i < 6; i++) {
+		//	buffSend[i] = a_char[i + std::strlen(a_char) - 6];
+		//}
+		//for (int i = 12 - std::strlen(b_char); i < 12; i++) {
+		//	buffSend[i] = b_char[i + std::strlen(b_char) - 12];
+		//}
+
+		recv(sockClient, buffRecv, sizeof(buffRecv), 0);// Receive a trigger, then send the coordinates.
+		sprintf(buffSend, "%09d,%09d;", consoleread.coordata[0], -consoleread.coordata[1]);
+		send(sockClient, buffSend, sizeof(buffSend), 0);
+		//printf("%d", strlen(buffSend) + 1);
+
+		if (DEBUG_FLAG)
 		{
-			flag_client_closed = true;//whether the client socket is closed
+			//cout << consoleread.coordata[0] << endl;
+			//cout << a_char << endl;
+			cout << buffSend << endl;
 		}
-		//cout << "recvBuf: " << recvBuf << endl;
-		i = atoi(recvBuf);
-		output << i << " " << consoleread.coordata[0] << " " << -consoleread.coordata[1] << endl;//record the frame number and coordinates
 
-		//cout << i << " " << consoleread.coordata[0] << " " << -consoleread.coordata[1] << endl;
 	}
-	output.close();
-
-	closesocket(sockConn);
-	closesocket(sockSrv);
+	
+	//关闭套接字
+	closesocket(sockClient);
 	WSACleanup();
 
 	return 0;
@@ -689,6 +681,10 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			if (TRTflag == 0)// manually control the stage
 			{
 				consoleread.ConCoorRead();
+				if (DEBUG_FLAG)
+				{
+					cout << "coordinates: " << consoleread.coordata[0] << "," << -consoleread.coordata[1] << endl;
+				}
 				//if (params->voltage_x != 0)
 				//{
 				//	cout << "volInput: " << params->voltage_x << ", " << params->voltage_y << endl;

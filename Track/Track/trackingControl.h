@@ -55,7 +55,7 @@ struct trackingParams
 		this->gammaX = 0.03;
 		this->gammaY = 0.03;
 		this->max_command = 10.0;
-		this->max_shift_head2yolk = 29.0;
+		this->max_shift_head2yolk = 45.0;
 		this->scale_x = 30.0;
 		this->scale_y = 30.0;
 		this->theta = -0.043;
