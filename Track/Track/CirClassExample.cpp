@@ -210,7 +210,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//tensorRT
 			cout << "load model....." << endl;
 			TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
-			trt.DeserializeModel("trackKeyPointModel_0527_unet_320crop.trt");
+			trt.DeserializeModel("trackKeyPointModel_0606_unet_320crop.trt");
 			trt.createInferenceContext();
 			cout << "Deserialize TRT model Done." << endl;
 			bt.trt = trt;

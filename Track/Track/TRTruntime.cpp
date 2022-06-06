@@ -169,7 +169,8 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor)
 
 	}
 	cudaStreamSynchronize(stream);
-	
+	free(data);
+	data = NULL;
 
 	//cout << "3333" << endl;
 	return;
