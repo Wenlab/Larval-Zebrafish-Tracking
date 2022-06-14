@@ -176,3 +176,49 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor)
 	return;
 }
 
+void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor, std::vector<float>& confidence)
+{
+
+	int inputId = 0, outputId = 1; // Here I assume input=0, output=1 for the current network
+	// Infer asynchronously, in a proper cuda way !
+	void *data = malloc(batchSize * imgH * imgW * sizeof(float));
+
+	memcpy(data, img.ptr<float>(0), batchSize * imgH * imgW * sizeof(float));
+
+
+	cudaMemcpyAsync(bindings[inputId], data, batchSize * imgH * imgW * sizeof(float), cudaMemcpyHostToDevice,
+		stream);
+
+
+	//cout << "1111" << endl;
+	float prob[1 * 2 * IMG_SIZE * IMG_SIZE];   //如果更换模型 需要改这里的参数
+	context->enqueueV2(bindings, stream, nullptr);
+	//cout << "infer succesesful!!" << endl;
+	cudaMemcpyAsync(prob, bindings[outputId], batchSize * heatmapNum * imgH * imgW * sizeof(float),
+		cudaMemcpyDeviceToHost, stream);
+
+	//cout << "2222" << endl;
+
+	/* get result  */
+
+	std::vector<float> results(std::begin(prob), std::end(prob));
+	for (int i = 0; i < heatmapNum; i++)
+	{
+		vector<float>::const_iterator First = results.begin() + i * imgH * imgW; // 找到heatmap的第一个像素
+		vector<float>::const_iterator Second = results.begin() + (i + 1) *  imgH * imgW; // 找到heatmap的末尾
+		vector<float> result(First, Second);
+
+		auto maxPosition1 = std::max_element(result.begin(), result.end());
+		int pos = maxPosition1 - result.begin();
+		cv::Point maxLoc(pos % imgH, floor(pos / imgW));
+		outputTensor.push_back(maxLoc);
+		confidence.push_back(result[pos]);
+
+	}
+	cudaStreamSynchronize(stream);
+	free(data);
+	data = NULL;
+
+	//cout << "3333" << endl;
+	return;
+}

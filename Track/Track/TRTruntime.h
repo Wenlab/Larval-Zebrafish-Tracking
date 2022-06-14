@@ -87,6 +87,7 @@ public:
 
 	// Run a single inference
 	void launchInference(Mat img, std::vector<Point>& outputTensor);
+	void launchInference(Mat img, std::vector<Point>& outputTensor, std::vector<float>& confidence);
 private:
 
 	Logger logger;

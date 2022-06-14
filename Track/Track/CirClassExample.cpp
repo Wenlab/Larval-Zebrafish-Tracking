@@ -88,6 +88,8 @@ using namespace std;
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #pragma comment(lib, "ws2_32.lib")
 
 // Threads
@@ -118,6 +120,7 @@ struct bitflowTRTStru
 	{
 	}
 };
+Mat test;
 
 //tgd
 //TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
@@ -210,7 +213,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//tensorRT
 			cout << "load model....." << endl;
 			TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
-			trt.DeserializeModel("trackKeyPointModel_0606_unet_320crop.trt");
+			trt.DeserializeModel("trackKeyPointModel_0607_unet_320crop.trt");
 			trt.createInferenceContext();
 			cout << "Deserialize TRT model Done." << endl;
 			bt.trt = trt;
@@ -588,6 +591,19 @@ UINT FrameGUIThread(LPVOID lpdwParam)
 
 UINT SendCoorThread(LPVOID lpdwParam)
 {
+	int i = 1;
+	Mat test4;
+	time_t nowtime;
+	nowtime = time(NULL);
+	struct tm *local;
+	local = localtime(&nowtime);
+	char char_time[100];
+	char path_image[100];
+	sprintf(path_image, "H:\\track_in_c\\%d_%d_%d-%d_%d_%d\\", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+	mkdir(path_image);
+	cout << "Mkdir for image recording succeeds!\n";
+
+
 	//加载套接字
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -639,6 +655,16 @@ UINT SendCoorThread(LPVOID lpdwParam)
 		send(sockClient, buffSend, sizeof(buffSend), 0);
 		//printf("%d", strlen(buffSend) + 1);
 
+		//record the images
+		if (i % 1 == 0)
+		{
+			test4 = test.clone();
+			//cv::circle(test4, params->head, 6, 128, 2);
+			//cv::circle(test4, params->yolk, 3, 128, 2);
+			imwrite(path_image + cv::format("%.6d", i) + ".jpg", test4);
+			i++;
+		}
+
 		if (DEBUG_FLAG)
 		{
 			//cout << consoleread.coordata[0] << endl;
@@ -664,7 +690,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 	BFU32 frameCount = -2;
 	BFU32 frameCount_processed = 0;
 
-	Mat test(cv::Size(IMG_SIZE, IMG_SIZE), CV_8UC1);
+	test = Mat(cv::Size(IMG_SIZE, IMG_SIZE), CV_8UC1);
 	Mat test2(cv::Size(IMG_SIZE, IMG_SIZE), CV_32FC1);
 
 	try
@@ -740,11 +766,12 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					//cout << frameCount << "    " << bt->frameNum << endl;
 					test.data = (uchar*) bt->imageDataBuffer;
 					vector<cv::Point> outputVec;
+					vector<float> confidence;
 					
 					test.convertTo(test2, CV_32FC1);
 					test2 = test2 / 255;
 					QueryPerformanceCounter(&timeEnd2);
-					bt->trt.launchInference(test2, outputVec);
+					bt->trt.launchInference(test2, outputVec, confidence);
 					QueryPerformanceCounter(&timeEnd3);
 
 					double elapsed_ConCoorRead = (timeEnd1.QuadPart - timeStart.QuadPart) / quadpart;
@@ -772,12 +799,15 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 
 					Point2d fish_direction = Point2d(outputVec[0].x - outputVec[1].x, outputVec[0].y - outputVec[1].y);
 					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
-					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
+					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || 
+						(outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0)||
+						confidence[0]+confidence[1]<20000)//fish detection error!!!
 					{
 						cout << "fish detection error!" << endl;
 						cout << "head: " << outputVec[0] << endl;
 						cout << "yolk: " << outputVec[1] << endl << endl;
-						voltage.volInput(0, 0);//Stop the stage while fish detection error.
+						//voltage.volInput(0, 0);//Stop the stage while fish detection error.
+						voltage.volInput(params->voltage_x, params->voltage_y);//找不到鱼的时候，改手动控制
 						continue;//Do nothing else while fish detection error.
 					}
 					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
@@ -825,7 +855,14 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double elapsed_MPC = (timeEnd5.QuadPart - timeEnd4.QuadPart) / quadpart;
 
 					// Output the voltage
-					voltage.volInput(voltage_x, voltage_y);
+					if (params->voltage_x != 0 || params->voltage_y != 0)//如果有手动控制输入，优先按照手动控制
+					{
+						voltage.volInput(params->voltage_x, params->voltage_y);
+					}
+					else
+					{
+						voltage.volInput(voltage_x, voltage_y);
+					}
 
 					if (command_history.size() != params->command_history_length)// If the size of command_history is not equal to command_history_length, initialize it with 0.
 					{
@@ -870,6 +907,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			{
 				cout << "frameCount processed: " << frameCount_processed << endl << endl;
 				cout << "break" << endl;
+				exit(0);//最好不要这样，但是不知道Fl::run()怎么停，暂时在这里退出程序。
 				break;
 			}
 		}
