@@ -55,6 +55,10 @@ struct trackingParams
 
 	cv::Point head;
 	cv::Point yolk;
+	double confidence_h;
+	double confidence_y;
+	double threshold_confidence_h;
+	double threshold_confidence_y;
 	bool fish_detection;
 
 	trackingParams()
@@ -83,6 +87,10 @@ struct trackingParams
 
 		this->head = cv::Point(0, 0);
 		this->yolk = cv::Point(0, 0);
+		this->confidence_h = 0;
+		this->confidence_y = 0;
+		this->threshold_confidence_h = 100;
+		this->threshold_confidence_y = 100;
 		this->fish_detection = false;
 	}
 }; 

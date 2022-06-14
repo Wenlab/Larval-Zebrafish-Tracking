@@ -658,7 +658,8 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 		//cout << "recvBuf: " << recvBuf << endl;
 		i = atoi(recvBuf);
 		output << i << ", " << "x: " << consoleread.coordata[0] << ", " << "y: " << -consoleread.coordata[1];//record the frame number and coordinates
-		output << ", detection: " << params->fish_detection << ", head: " << params->head << ", yolk: " << params->yolk << endl;
+		output << ", detection: " << params->fish_detection << ", head: " << params->head << ", yolk: " << params->yolk;
+		output << ", confidence_h: " << params->confidence_h << ", confidence_y: " << params->confidence_y << endl;
 
 		//record the images
 		if (i % 1 == 0)
@@ -773,6 +774,8 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 
 					params->head = outputVec[0];
 					params->yolk = outputVec[1];
+					params->confidence_h = confidence[0];
+					params->confidence_y = confidence[1];
 
 					double elapsed_ConCoorRead = (timeEnd1.QuadPart - timeStart.QuadPart) / quadpart;
 					double elapsed_convertion = (timeEnd2.QuadPart - timeEnd1.QuadPart) / quadpart;
@@ -801,7 +804,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
 					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || 
 						(outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0)||
-						confidence[0] + confidence[1] < 20000)//fish detection error!!!
+						confidence[0] < params->threshold_confidence_h || confidence[1] < params->threshold_confidence_y)//fish detection error!!!
 					{
 						params->fish_detection = false;
 						cout << "fish detection error!" << endl;
