@@ -61,7 +61,7 @@ int voltageControlPanel::handle(int event)
 	//float voltage_y = 0.0;
 	float x_bias = 400;
 	float y_bias = 50;
-	if (g_manualControl)  //手动控制
+	if (1)  //手动控制（改为->无论哪种模式，都可以手动控制）
 	{
 		switch (event)
 		{

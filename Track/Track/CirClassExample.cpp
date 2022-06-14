@@ -212,7 +212,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//tensorRT
 			cout << "load model....." << endl;
 			TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
-			trt.DeserializeModel("trackKeyPointModel_0606_unet_320crop.trt");
+			trt.DeserializeModel("trackKeyPointModel_0607_unet_320crop.trt");
 			trt.createInferenceContext();
 			cout << "Deserialize TRT model Done." << endl;
 			bt.trt = trt;
@@ -763,11 +763,12 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					//cout << frameCount << "    " << bt->frameNum << endl;
 					test.data = (uchar*) bt->imageDataBuffer;
 					vector<cv::Point> outputVec;
+					vector<float> confidence;
 					
 					test.convertTo(test2, CV_32FC1);
 					test2 = test2 / 255;
 					QueryPerformanceCounter(&timeEnd2);
-					bt->trt.launchInference(test2, outputVec);
+					bt->trt.launchInference(test2, outputVec, confidence);
 					QueryPerformanceCounter(&timeEnd3);
 
 					params->head = outputVec[0];
@@ -798,13 +799,16 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 
 					Point2d fish_direction = Point2d(outputVec[0].x - outputVec[1].x, outputVec[0].y - outputVec[1].y);
 					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
-					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || (outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0))//fish detection error!!!
+					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || 
+						(outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0)||
+						confidence[0] + confidence[1] < 20000)//fish detection error!!!
 					{
 						params->fish_detection = false;
 						cout << "fish detection error!" << endl;
 						cout << "head: " << outputVec[0] << endl;
 						cout << "yolk: " << outputVec[1] << endl << endl;
-						voltage.volInput(0, 0);//Stop the stage while fish detection error.
+						//voltage.volInput(0, 0);//Stop the stage while fish detection error.
+						voltage.volInput(params->voltage_x, params->voltage_y);//找不到鱼的时候，改手动控制
 						continue;//Do nothing else while fish detection error.
 					}
 					else
@@ -856,7 +860,15 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double elapsed_MPC = (timeEnd5.QuadPart - timeEnd4.QuadPart) / quadpart;
 
 					// Output the voltage
-					voltage.volInput(voltage_x, voltage_y);
+					//voltage.volInput(voltage_x, voltage_y);
+					if (params->voltage_x != 0 || params->voltage_y != 0)//如果有手动控制输入，优先按照手动控制
+					{
+						voltage.volInput(params->voltage_x, params->voltage_y);
+					}
+					else
+					{
+						voltage.volInput(voltage_x, voltage_y);
+					}
 
 					if (command_history.size() != params->command_history_length)// If the size of command_history is not equal to command_history_length, initialize it with 0.
 					{
@@ -901,7 +913,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			{
 				cout << "frameCount processed: " << frameCount_processed << endl << endl;
 				cout << "break" << endl;
-				exit(0);
+				exit(0);//最好不要这样，但是不知道Fl::run()怎么停，暂时在这里退出程序。
 				break;
 			}
 		}
