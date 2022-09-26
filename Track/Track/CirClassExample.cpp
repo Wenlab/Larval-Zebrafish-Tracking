@@ -84,13 +84,16 @@ using namespace std;
 
 // TCP
 #define BLITZ_SERVER_PORT 11000
-#define BLITZ_SERVER_IP "192.168.1.27"
+#define BLITZ_SERVER_IP "192.168.1.104"
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include"TCP_client.h"
 #pragma comment(lib, "ws2_32.lib")
+
+double getRotateAngle(double x1, double y1, double x2, double y2);
 
 // Threads
 UINT WaitForBufferDone(LPVOID lpdwParam);
@@ -98,6 +101,7 @@ UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
 UINT SendCoorThread(LPVOID lpdwParam);
+UINT TCPClientThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -161,6 +165,10 @@ Point dst_fish_position = Point(160, 160);
 //GUI
 trackingParams* params;
 
+
+//tcp client
+TCP_client client;
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	int nRetCode = 0;
@@ -184,6 +192,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
 		CWinThread* pSendCoorThread = NULL;
+		CWinThread* pTCPClientThread = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -273,7 +282,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			pSendCoorThread = AfxBeginThread(SendCoorThread, &params, THREAD_PRIORITY_HIGHEST);
 			if (pSendCoorThread == BFNULL)
 				return 1;
-			
+
+			pTCPClientThread = AfxBeginThread(TCPClientThread, &params, THREAD_PRIORITY_HIGHEST);
+			if (pTCPClientThread == BFNULL)
+				return 1;
 
 			//printf("\nPress G (as in Go) to start Acquisition ");
 			//printf("	Press S to Stop Acquisition \n");
@@ -444,6 +456,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Sleep(10);
 		}
 
+		while (GetExitCodeThread(pTCPClientThread->m_hThread, &exitCode) &&
+			exitCode == STILL_ACTIVE)
+		{
+			Sleep(10);
+		}
 	}
 
 	return nRetCode;
@@ -497,57 +514,11 @@ UINT WaitForBufferDone(LPVOID lpdwParam)
 					}
 				}
 
-				/*
-				BFU32 pnextnum = -1;
-				PBFQNode currentNote = cirHandle.pNode;
-				BFU32 pnum = currentNote->BufferNumber;
-				cout << "start num: " << pnum << endl;
-				cout << endl;
-				int a = 0;
-				while (a!=5)
-				{
-					BFU32 currentnum = currentNote->BufferNumber;
-					cout << "current BufferNumber: " << currentnum << endl;
-					cout << "status: " << currentNote->Status << endl;
-					currentNote = currentNote->Next;
-					pnextnum = currentNote->BufferNumber;
-					cout << "next BufferNumber: " << pnextnum << endl;
-					cout << endl;
-					a++;
-				}
-				cout << "-----------------------------------" << endl;
-
-				*/
-				
-				/*
-				if (board->getNumFramesCaptured()%1000==0)
-				{
-					cout << "caputured image num: " << board->getNumFramesCaptured() << endl;
-				}
-				*/
-
-				// single thread:
-
-				/*
-				//TOdO: add track code
-				vector<cv::Point> outputVec;
-				
-				void* image = cirHandle.pBufData;
-
-				trt.launchInference(image, outputVec);
-
-				cout << "frame num:" << cirHandle.FrameCount << endl;
-				*/
 
 
 				// Mark the buffer as AVAILABLE after processing
 				board->setBufferStatus(cirHandle, BIAVAILABLE);
 
-				// output some stats
-				//cout << setfill('0');
-				
-				//cout << "Buffer: " << setw(8) << cirHandle.BufferNumber << " ";
-				//cout << "captured num: " << board->getNumFramesCaptured() << endl;
 			}
 
 			rv = board->waitDoneFrame(INFINITE, &cirHandle);
@@ -585,6 +556,48 @@ UINT FrameGUIThread(LPVOID lpdwParam)
 	make_window(params);
 	cout << "Start Fl::run()... " << endl;
 	Fl::run();
+
+	return 0;
+}
+
+UINT TCPClientThread(LPVOID lpdwParam)
+{
+	cout << "TCP client say hello!!" << endl;
+	client.initialize();
+
+	//int sendData = 166;
+	//sprintf_s(sendBuff, "%06d", sendData);
+	while (1)
+	{
+		cout << "waiting for connect..." << endl;
+		if (client.createSocketConnect())
+		{
+			std::cout << "connect success......" << std::endl;
+			while (1)
+			{
+				char sendBuff[100];
+				int sendData = params->headingAngle;
+				sprintf_s(sendBuff, "%06d", sendData);
+				client.sendMsg(sendBuff, sizeof(sendBuff));
+				//client.recvMsg();
+				//sendData += 1;
+				sprintf_s(sendBuff, "%06d", sendData);
+
+				char revSerData[200];
+				memset(revSerData, 0, sizeof(revSerData));
+				if (recv(client.socketClient, revSerData, sizeof(revSerData), 0) <= 0)
+				{
+					break;
+				}
+
+				Sleep(1);
+
+
+			}
+			client.close();
+		}
+	}
+	client.close();
 
 	return 0;
 }
@@ -635,25 +648,13 @@ UINT SendCoorThread(LPVOID lpdwParam)
 	char buffRecv[100];
 	while (!endTest)
 	{
-		//char a_char[7];
-		//char b_char[7];
-		//memset(buffSend, '0', 12);
-		//buffSend[12] = '\0';
-		//
-		//_itoa_s(abs(consoleread.coordata[0]), a_char, 7, 10);
-		//_itoa_s(abs(consoleread.coordata[1]), b_char, 7, 10);
-
-		//for (int i = 6 - std::strlen(a_char); i < 6; i++) {
-		//	buffSend[i] = a_char[i + std::strlen(a_char) - 6];
-		//}
-		//for (int i = 12 - std::strlen(b_char); i < 12; i++) {
-		//	buffSend[i] = b_char[i + std::strlen(b_char) - 12];
-		//}
 
 		recv(sockClient, buffRecv, sizeof(buffRecv), 0);// Receive a trigger, then send the coordinates.
-		sprintf(buffSend, "%09d,%09d;", consoleread.coordata[0], -consoleread.coordata[1]);
+		sprintf(buffSend, "%09d,%09d,%09d,%09d,%09d,%09d;", consoleread.coordata[0], -consoleread.coordata[1], params->head.x, params->head.y, params->yolk.x, params->yolk.y);
 		send(sockClient, buffSend, sizeof(buffSend), 0);
 		//printf("%d", strlen(buffSend) + 1);
+		//printf(buffSend); 
+		//printf("\n");
 
 		//record the images
 		if (i % 1 == 0)
@@ -821,6 +822,9 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						params->fish_detection = true;
 					}
 					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
+					Point vecFish = params->head - params->yolk;
+					Point vecStand(0, -1);
+					params->headingAngle = 360 - getRotateAngle(vecFish.x, vecFish.y, vecStand.x, vecStand.y);
 
 					if (fish_tr_history_c.size() != params->fish_history_length)// If the size of fish_tr_history_c is not equal to fish_history_length, initialize it with the data of the present frame.
 					{
@@ -933,4 +937,40 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 	}
 
 	return 0;
+}
+
+
+double getRotateAngle(double x1, double y1, double x2, double y2)
+{
+	const double epsilon = 1.0e-6;
+	const double nyPI = acos(-1.0);
+	double dist, dot, degree, angle;
+
+	// normalize
+	dist = sqrt(x1 * x1 + y1 * y1);
+	x1 /= dist;
+	y1 /= dist;
+	dist = sqrt(x2 * x2 + y2 * y2);
+	x2 /= dist;
+	y2 /= dist;
+	// dot product
+	dot = x1 * x2 + y1 * y2;
+	if (fabs(dot - 1.0) <= epsilon)
+		angle = 0.0;
+	else if (fabs(dot + 1.0) <= epsilon)
+		angle = nyPI;
+	else {
+		double cross;
+
+		angle = acos(dot);
+		//cross product
+		cross = x1 * y2 - x2 * y1;
+		// vector p2 is clockwise from vector p1 
+		// with respect to the origin (0.0)
+		if (cross < 0) {
+			angle = 2 * nyPI - angle;
+		}
+	}
+	degree = angle * 180.0 / nyPI;
+	return degree;
 }

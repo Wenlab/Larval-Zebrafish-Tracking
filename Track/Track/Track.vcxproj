@@ -146,6 +146,7 @@
     <ClCompile Include="MPC.cpp" />
     <ClCompile Include="MPC_main.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TCP_client.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="trackingControl.cpp" />
     <ClCompile Include="TRTruntime.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="NIDAQmx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TCP_client.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="trackingControl.h" />
     <ClInclude Include="TRTruntime.h" />

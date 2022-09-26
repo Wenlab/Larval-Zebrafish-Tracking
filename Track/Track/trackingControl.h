@@ -61,6 +61,8 @@ struct trackingParams
 	double threshold_confidence_y;
 	bool fish_detection;
 
+	int headingAngle;  //send to online optogenetic
+
 	trackingParams()
 	{
 		this->command_history_length = 30.0;
@@ -75,8 +77,8 @@ struct trackingParams
 		this->theta = -0.043;
 		this->scale_x2 = 10000.0;
 		this->scale_y2 = 12800.0;
-		this->dst_fish_position_x = 160;
-		this->dst_fish_position_y = 160;
+		this->dst_fish_position_x = 162;
+		this->dst_fish_position_y = 158;
 
 		this->trackingOn = false;
 		this->flag_cb = false;
@@ -92,6 +94,8 @@ struct trackingParams
 		this->threshold_confidence_h = 100;
 		this->threshold_confidence_y = 100;
 		this->fish_detection = false;
+
+		this->headingAngle = 0;
 	}
 }; 
 //将通过鼠标获取的voltage的值传入params结构体

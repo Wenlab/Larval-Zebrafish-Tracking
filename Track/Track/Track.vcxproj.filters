@@ -48,6 +48,9 @@
     <ClCompile Include="trackingControl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TCP_client.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CircClassExample.h">
@@ -84,6 +87,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="trackingControl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TCP_client.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
