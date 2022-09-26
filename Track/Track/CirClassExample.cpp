@@ -61,6 +61,9 @@
 //MPC
 #include "MPC_main.h"
 
+//TCPclient
+#include"TCP_client.h"
+
 //GUI
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
@@ -91,12 +94,15 @@ using namespace std;
 #include <time.h>
 #pragma comment(lib, "ws2_32.lib")
 
+double getRotateAngle(double x1, double y1, double x2, double y2);
+
 // Threads
 UINT WaitForBufferDone(LPVOID lpdwParam);
 UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
 UINT RecordCoorThread(LPVOID lpdwParam);
+UINT TCPClientThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -160,6 +166,9 @@ Point dst_fish_position = Point(160, 160);
 //GUI
 trackingParams* params;
 
+//tcp client
+TCP_client client;
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	int nRetCode = 0;
@@ -183,6 +192,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
 		CWinThread* pRecordCoorThread = NULL;
+		CWinThread* pTCPClientThread = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -212,7 +222,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			//tensorRT
 			cout << "load model....." << endl;
 			TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
-			trt.DeserializeModel("trackKeyPointModel_0607_unet_320crop.trt");
+			trt.DeserializeModel("trackKeyPointModel_0618_unet_320crop.trt");
 			trt.createInferenceContext();
 			cout << "Deserialize TRT model Done." << endl;
 			bt.trt = trt;
@@ -273,6 +283,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pRecordCoorThread == BFNULL)
 				return 1;
 			
+			pTCPClientThread = AfxBeginThread(TCPClientThread, &params, THREAD_PRIORITY_HIGHEST);
+			if (pTCPClientThread == BFNULL)
+				return 1;
 
 			//printf("\nPress G (as in Go) to start Acquisition ");
 			//printf("	Press S to Stop Acquisition \n");
@@ -438,6 +451,12 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		}
 
 		while (GetExitCodeThread(pRecordCoorThread->m_hThread, &exitCode) &&
+			exitCode == STILL_ACTIVE)
+		{
+			Sleep(10);
+		}
+
+		while (GetExitCodeThread(pTCPClientThread->m_hThread, &exitCode) &&
 			exitCode == STILL_ACTIVE)
 		{
 			Sleep(10);
@@ -681,6 +700,49 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 	return 0;
 }
 
+UINT TCPClientThread(LPVOID lpdwParam)
+{
+	cout << "TCP client say hello!!" << endl;
+	client.initialize();
+
+	//int sendData = 166;
+	//sprintf_s(sendBuff, "%06d", sendData);
+	while (1)
+	{
+		cout << "waiting for connect..." << endl;
+		if (client.createSocketConnect())
+		{
+			std::cout << "connect success......" << std::endl;
+			while (1)
+			{
+				char sendBuff[100];
+				int sendData = params->headingAngle;
+				sprintf_s(sendBuff, "%06d", sendData);
+				client.sendMsg(sendBuff, sizeof(sendBuff));
+				//client.recvMsg();
+				//sendData += 1;
+				sprintf_s(sendBuff, "%06d", sendData);
+
+				char revSerData[200];
+				memset(revSerData, 0, sizeof(revSerData));
+				if (recv(client.socketClient, revSerData, sizeof(revSerData), 0) <= 0)
+				{
+					break;
+				}
+
+				Sleep(1);
+
+
+			}
+			client.close();
+		}
+	}
+	client.close();
+
+	return 0;
+}
+
+
 UINT TRTImageProcessThread(LPVOID lpdwParam)
 {
 	bitflowTRTStru* bt = (bitflowTRTStru*)lpdwParam;
@@ -819,6 +881,9 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						params->fish_detection = true;
 					}
 					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
+					Point vecFish = params->head - params->yolk;
+					Point vecStand(0, -1);
+					params->headingAngle = 360 - getRotateAngle(vecFish.x, vecFish.y, vecStand.x, vecStand.y);
 
 					if (fish_tr_history_c.size() != params->fish_history_length)// If the size of fish_tr_history_c is not equal to fish_history_length, initialize it with the data of the present frame.
 					{
@@ -932,4 +997,40 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 	}
 
 	return 0;
+}
+
+
+double getRotateAngle(double x1, double y1, double x2, double y2)
+{
+	const double epsilon = 1.0e-6;
+	const double nyPI = acos(-1.0);
+	double dist, dot, degree, angle;
+
+	// normalize
+	dist = sqrt(x1 * x1 + y1 * y1);
+	x1 /= dist;
+	y1 /= dist;
+	dist = sqrt(x2 * x2 + y2 * y2);
+	x2 /= dist;
+	y2 /= dist;
+	// dot product
+	dot = x1 * x2 + y1 * y2;
+	if (fabs(dot - 1.0) <= epsilon)
+		angle = 0.0;
+	else if (fabs(dot + 1.0) <= epsilon)
+		angle = nyPI;
+	else {
+		double cross;
+
+		angle = acos(dot);
+		//cross product
+		cross = x1 * y2 - x2 * y1;
+		// vector p2 is clockwise from vector p1 
+		// with respect to the origin (0.0)
+		if (cross < 0) {
+			angle = 2 * nyPI - angle;
+		}
+	}
+	degree = angle * 180.0 / nyPI;
+	return degree;
 }
