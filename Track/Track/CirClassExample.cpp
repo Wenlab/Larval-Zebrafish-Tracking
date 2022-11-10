@@ -84,7 +84,7 @@ using namespace std;
 
 // TCP
 #define BLITZ_SERVER_PORT 11000
-#define BLITZ_SERVER_IP "192.168.1.104"
+#define BLITZ_SERVER_IP "169.254.147.42"
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WinSock2.h>
 #include <stdio.h>
@@ -101,7 +101,7 @@ UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
 UINT SendCoorThread(LPVOID lpdwParam);
-UINT TCPClientThread(LPVOID lpdwParam);
+//UINT TCPClientThread(LPVOID lpdwParam);
 
 MSG		Msg;
 BFBOOL	endTest = FALSE;
@@ -192,7 +192,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
 		CWinThread* pSendCoorThread = NULL;
-		CWinThread* pTCPClientThread = NULL;
+		//CWinThread* pTCPClientThread = NULL;
 
 		//GUI
 		params = new trackingParams;
@@ -283,9 +283,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pSendCoorThread == BFNULL)
 				return 1;
 
-			pTCPClientThread = AfxBeginThread(TCPClientThread, &params, THREAD_PRIORITY_HIGHEST);
-			if (pTCPClientThread == BFNULL)
-				return 1;
+			//pTCPClientThread = AfxBeginThread(TCPClientThread, &params, THREAD_PRIORITY_HIGHEST);
+			//if (pTCPClientThread == BFNULL)
+			//	return 1;
 
 			//printf("\nPress G (as in Go) to start Acquisition ");
 			//printf("	Press S to Stop Acquisition \n");
@@ -456,11 +456,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			Sleep(10);
 		}
 
-		while (GetExitCodeThread(pTCPClientThread->m_hThread, &exitCode) &&
-			exitCode == STILL_ACTIVE)
-		{
-			Sleep(10);
-		}
+		//while (GetExitCodeThread(pTCPClientThread->m_hThread, &exitCode) &&
+		//	exitCode == STILL_ACTIVE)
+		//{
+		//	Sleep(10);
+		//}
 	}
 
 	return nRetCode;
@@ -650,7 +650,7 @@ UINT SendCoorThread(LPVOID lpdwParam)
 	{
 
 		recv(sockClient, buffRecv, sizeof(buffRecv), 0);// Receive a trigger, then send the coordinates.
-		sprintf(buffSend, "%09d,%09d,%09d,%09d,%09d,%09d;", consoleread.coordata[0], -consoleread.coordata[1], params->head.x, params->head.y, params->yolk.x, params->yolk.y);
+		sprintf(buffSend, "%09d,%09d,%09d,%09d,%09d,%09d,%d;", consoleread.coordata[0], -consoleread.coordata[1], params->head.x, params->head.y, params->yolk.x, params->yolk.y, params->fish_detection);
 		send(sockClient, buffSend, sizeof(buffSend), 0);
 		//printf("%d", strlen(buffSend) + 1);
 		//printf(buffSend); 

@@ -77,8 +77,8 @@ struct trackingParams
 		this->theta = -0.043;
 		this->scale_x2 = 10000.0;
 		this->scale_y2 = 12800.0;
-		this->dst_fish_position_x = 162;
-		this->dst_fish_position_y = 158;
+		this->dst_fish_position_x = 168;
+		this->dst_fish_position_y = 160;
 
 		this->trackingOn = false;
 		this->flag_cb = false;
