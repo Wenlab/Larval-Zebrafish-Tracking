@@ -33,7 +33,7 @@ public:
 
 	char recvBuff[1024];
 
-	char localhost[20] = "192.168.1.96";
+	char localhost[50] = "169.254.157.190";;
 	char* addrserver;
 	SOCKADDR_IN addrServer;
 	SOCKET socketClient;

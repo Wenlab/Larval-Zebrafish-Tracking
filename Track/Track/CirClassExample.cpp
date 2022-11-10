@@ -102,6 +102,7 @@ UINT CirErrorThread(LPVOID lpdwParam);
 UINT TRTImageProcessThread(LPVOID lpdwParam);
 UINT FrameGUIThread(LPVOID lpdwParam);
 UINT RecordCoorThread(LPVOID lpdwParam);
+UINT RecordFrameThread(LPVOID lpdwParam);
 UINT TCPClientThread(LPVOID lpdwParam);
 
 MSG		Msg;
@@ -126,6 +127,16 @@ struct bitflowTRTStru
 	}
 };
 Mat test;
+SYSTEMTIME currentTime_l;
+char time_stamp_l_s[256] = { 0 };
+
+Mat temp(320, 320, CV_8UC1);
+struct image_time_pair
+{
+	Mat image;
+	char time_stamp_s[256];
+};
+queue<image_time_pair> images_captured;
 
 //tgd
 //TRTruntime trt(1, IMG_SIZE, IMG_SIZE, 2);
@@ -192,6 +203,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CWinThread* pFrameIMGThread = NULL;
 		CWinThread* pFrameGUI = NULL;
 		CWinThread* pRecordCoorThread = NULL;
+		CWinThread* pRecordFrameThread = NULL;
 		CWinThread* pTCPClientThread = NULL;
 
 		//GUI
@@ -281,6 +293,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 			pRecordCoorThread = AfxBeginThread(RecordCoorThread, &params, THREAD_PRIORITY_HIGHEST);
 			if (pRecordCoorThread == BFNULL)
+				return 1;
+
+			pRecordFrameThread = AfxBeginThread(RecordFrameThread, &params, THREAD_PRIORITY_HIGHEST);
+			if (pRecordFrameThread == BFNULL)
 				return 1;
 			
 			pTCPClientThread = AfxBeginThread(TCPClientThread, &params, THREAD_PRIORITY_HIGHEST);
@@ -470,6 +486,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 UINT WaitForBufferDone(LPVOID lpdwParam)
 {
+	SYSTEMTIME currentTime;
+	char time_stamp_s[256] = { 0 };
 	
 	CircularInterface* board = (CircularInterface*)lpdwParam;
 	try
@@ -570,6 +588,15 @@ UINT WaitForBufferDone(LPVOID lpdwParam)
 
 			rv = board->waitDoneFrame(INFINITE, &cirHandle);
 			//cout << "grab thread" << endl;
+
+			GetLocalTime(&currentTime);
+			sprintf(time_stamp_s, "%d_%d_%d_%d_%d", currentTime.wDay, currentTime.wHour, currentTime.wMinute, currentTime.wSecond, currentTime.wMilliseconds);
+			temp.data = (uchar*)cirHandle.pBufData;
+			image_time_pair image_time_pair_temp;
+			image_time_pair_temp.image = temp.clone();
+			strcpy(image_time_pair_temp.time_stamp_s, time_stamp_s);
+			//cout << temp.empty() << endl;
+			images_captured.push(image_time_pair_temp);
 		}
 	}
 	catch (BFException e)
@@ -678,7 +705,8 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 		i = atoi(recvBuf);
 		output << i << ", " << "x: " << consoleread.coordata[0] << ", " << "y: " << -consoleread.coordata[1];//record the frame number and coordinates
 		output << ", detection: " << params->fish_detection << ", head: " << params->head << ", yolk: " << params->yolk;
-		output << ", confidence_h: " << params->confidence_h << ", confidence_y: " << params->confidence_y << endl;
+		output << ", confidence_h: " << params->confidence_h << ", confidence_y: " << params->confidence_y;
+		output << ", time stamp: " << time_stamp_l_s << endl;
 
 		//record the images
 		if (i % 1 == 0)
@@ -698,6 +726,50 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 	WSACleanup();
 
 	return 0;
+}
+
+UINT RecordFrameThread(LPVOID lpdwParam)
+{
+	time_t nowtime;
+	SYSTEMTIME currentTime;
+	int time_stamp;
+	char time_stamp_s[256] = { 0 };
+	nowtime = time(NULL);
+	struct tm *local;
+	local = localtime(&nowtime);
+	char path_image[100];
+	sprintf(path_image, "H:\\340fps_tracking\\%d_%d_%d-%d_%d_%d\\", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+	mkdir(path_image);
+
+	VideoWriter writer(string(path_image) + "images.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 300, Size(320, 320), false);
+	ofstream time_stamps(string(path_image) + "time_stamps.txt");
+
+	while (!endTest)
+	{
+		if (!images_captured.empty())
+		{
+			//GetLocalTime(&currentTime);
+			//time_stamp = ((((currentTime.wDay * 24 + currentTime.wHour) * 60 + currentTime.wMinute) * 60) + currentTime.wSecond) * 1000 + currentTime.wMilliseconds;
+			//sprintf(time_stamp_s, "%d_%d_%d_%d_%d", currentTime.wDay, currentTime.wHour, currentTime.wMinute, currentTime.wSecond, currentTime.wMilliseconds);
+			if (images_captured.front().image.empty())
+			{
+				cout << "Image is empty!!!" << endl;
+				images_captured.pop();
+				continue;
+			}
+			//imwrite(strcat(strcat(path_image, time_stamp_s), ".png"), images_captured.front());
+			//sprintf(path_image, "H:\\340fps_tracking\\%d_%d_%d-%d_%d_%d\\", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+			writer << images_captured.front().image;
+			time_stamps << images_captured.front().time_stamp_s << endl;
+			images_captured.pop();
+			if (images_captured.size() > 100)
+				cout << "Number of frames in queue:" << images_captured.size() << endl;
+		}
+	}
+
+	writer.release();
+	time_stamps.close();
+	cout << "record frame thread say gooddbye!!" << endl;
 }
 
 UINT TCPClientThread(LPVOID lpdwParam)
@@ -825,6 +897,8 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					QueryPerformanceCounter(&timeEnd1);
 					//cout << frameCount << "    " << bt->frameNum << endl;
 					test.data = (uchar*) bt->imageDataBuffer;
+					GetLocalTime(&currentTime_l);
+					sprintf(time_stamp_l_s, "%d_%d_%d_%d_%d", currentTime_l.wDay, currentTime_l.wHour, currentTime_l.wMinute, currentTime_l.wSecond, currentTime_l.wMilliseconds);
 					vector<cv::Point> outputVec;
 					vector<float> confidence;
 					
