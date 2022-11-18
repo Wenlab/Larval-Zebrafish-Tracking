@@ -138,8 +138,8 @@ void make_window(trackingParams* params)
 	//Fl_Window* win = new Fl_Double_Window(800, 500, "Tracking Control");
 	win->begin();
 	//Fl_Button* initialize = new Fl_Button(10, 450, 70, 30, "&I&nitialize"); //child 0    : 1st widget
-	Fl_Button*  apply = new Fl_Button(40, 450, 70, 30, "A&pply"); //child 0   : 2nd widget
-	Fl_Button* ifTracking = new Fl_Button(130, 450, 100, 30, "&TrackingOn"); //child 1    : 3rd widget
+	Fl_Button*  apply = new Fl_Button(40, 460, 70, 30, "A&pply"); //child 0   : 2nd widget
+	Fl_Button* ifTracking = new Fl_Button(130, 460, 100, 30, "&TrackingOn"); //child 1    : 3rd widget
 
 
 	Fl_Input* command_history_length = new Fl_Input(200, 10, 120, 20, "command_history_length");  //child 2
@@ -180,7 +180,10 @@ void make_window(trackingParams* params)
 	Fl_Input* dst_fish_position_y = new Fl_Input(200, 400, 120, 20, "dst_fish_position_y");  //child 15
 	dst_fish_position_y->value(to_string(params->dst_fish_position_y).c_str());  //0~360
 
-	Fl_Button* close = new Fl_Button(260, 450, 70, 30, "&Quit"); //child 16   
+	Fl_Button* close = new Fl_Button(260, 460, 70, 30, "&Quit"); //child 16   
+
+	Fl_Input* shift_head = new Fl_Input(200, 430, 120, 20, "shift_head");  //child 17
+	shift_head->value(to_string(params->shift_head).c_str());  //
 
 	static voltageControlPanel *os_box = new voltageControlPanel(400, 50, panel_size, panel_size);
 
@@ -245,6 +248,9 @@ void apply_cb(Fl_Widget* o, void *data)
 
 	Fl_Input* dst_fish_position_y = (Fl_Input*)b->parent()->child(15);
 	params->dst_fish_position_y = atof(dst_fish_position_y->value());
+
+	Fl_Input* shift_head = (Fl_Input*)b->parent()->child(17);
+	params->shift_head = atof(shift_head->value());
 
 	//std::cout << params->voltage_x << std::endl;
 	//std::cout << params->command_history_length << std::endl;

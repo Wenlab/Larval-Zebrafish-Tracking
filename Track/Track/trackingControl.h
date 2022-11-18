@@ -45,6 +45,7 @@ struct trackingParams
 	float scale_y2;
 	float dst_fish_position_x;
 	float dst_fish_position_y;
+	float shift_head; //manually shift head along heading vector
 	
 	bool trackingOn;
 	bool flag_cb;//as a trigger, true if we click one of the buttons: TrackingOff, TrackingOn, Quit
@@ -79,6 +80,7 @@ struct trackingParams
 		this->scale_y2 = 12800.0;
 		this->dst_fish_position_x = 162;
 		this->dst_fish_position_y = 158;
+		this->shift_head = 0;
 
 		this->trackingOn = false;
 		this->flag_cb = false;
@@ -99,7 +101,7 @@ struct trackingParams
 
 	}
 }; 
-//将通过鼠标获取的voltage的值传入params结构体
+//锟斤拷通锟斤拷锟斤拷锟斤拷取锟斤拷voltage锟斤拷值锟斤拷锟斤拷params锟结构锟斤拷
 void getVoltages(trackingParams* params, float voltage_x, float voltage_y);
 /*****************************************************************************/
 /* This class provides a view to copy the offscreen surface to */
