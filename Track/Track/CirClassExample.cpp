@@ -775,6 +775,11 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					bt->trt.launchInference(test2, outputVec, confidence);
 					QueryPerformanceCounter(&timeEnd3);
 
+					Point2d fish_direction = Point2d(outputVec[0].x - outputVec[1].x, outputVec[0].y - outputVec[1].y);
+					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
+					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
+					outputVec[0].x = params->shift_head * fish_direction.x + outputVec[0].x; //manually shift head along heading vector
+					outputVec[0].y = params->shift_head * fish_direction.y + outputVec[0].y;
 					params->head = outputVec[0];
 					params->yolk = outputVec[1];
 					params->confidence_h = confidence[0];
@@ -803,8 +808,6 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						imwrite("H:/track_in_c/testImg/" + cv::format("%.6d", frameCount) + ".jpg", test3);
 					}
 
-					Point2d fish_direction = Point2d(outputVec[0].x - outputVec[1].x, outputVec[0].y - outputVec[1].y);
-					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
 					if (shift_head2yolk > params->max_shift_head2yolk || shift_head2yolk < 3 || 
 						(outputVec[1].x == 0 && outputVec[1].y == 0 && outputVec[0].x == 0 && outputVec[0].y == 0)||
 						confidence[0] < params->threshold_confidence_h || confidence[1] < params->threshold_confidence_y)//fish detection error!!!
@@ -821,7 +824,6 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					{
 						params->fish_detection = true;
 					}
-					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
 					Point vecFish = params->head - params->yolk;
 					Point vecStand(0, -1);
 					params->headingAngle = 360 - getRotateAngle(vecFish.x, vecFish.y, vecStand.x, vecStand.y);
