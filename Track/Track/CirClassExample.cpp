@@ -779,25 +779,26 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double shift_head2yolk = sqrt(fish_direction.x*fish_direction.x + fish_direction.y*fish_direction.y);
 					fish_direction = Point2d(fish_direction.x / shift_head2yolk, fish_direction.y / shift_head2yolk);//normalization
 					int shift_x = round(params->shift_head * fish_direction.x);
-					if (shift_x<0)
-					{
-						shift_x = 0;
-					}
-					if (shift_x>=IMG_SIZE)
-					{
-						shift_x = IMG_SIZE - 1;
-					}
 					int shift_y = round(params->shift_head * fish_direction.y);
-					if (shift_y<0)
-					{
-						shift_y = 0;
-					}
-					if (shift_y>=IMG_SIZE)
-					{
-						shift_y = IMG_SIZE - 1;
-					}
 					outputVec[0].x = shift_x + outputVec[0].x; //manually shift head along heading vector
+					if (outputVec[0].x < 0)
+					{
+						outputVec[0].x = 0;
+					}
+					if (outputVec[0].x >= IMG_SIZE)
+					{
+						outputVec[0].x = IMG_SIZE - 1;
+					}
 					outputVec[0].y = shift_y + outputVec[0].y;
+					if (outputVec[0].y < 0)
+					{
+						outputVec[0].y = 0;
+					}
+					if (outputVec[0].y >= IMG_SIZE)
+					{
+						outputVec[0].y = IMG_SIZE - 1;
+					}
+					
 					params->head = outputVec[0];
 					params->yolk = outputVec[1];
 					params->confidence_h = confidence[0];
