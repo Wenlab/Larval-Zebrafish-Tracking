@@ -45,7 +45,7 @@ struct trackingParams
 	float scale_y2;
 	float dst_fish_position_x;
 	float dst_fish_position_y;
-	float shift_head; //manually shift head along heading vector
+	float shift_head; //manually shift head along heading vector (pixel)
 	
 	bool trackingOn;
 	bool flag_cb;//as a trigger, true if we click one of the buttons: TrackingOff, TrackingOn, Quit
