@@ -39,18 +39,18 @@ void TRTruntime::createCudaEngine(const std::string & onnxFileName)
 
 	parser->parseFromFile(onnxFileName.c_str(), static_cast<int>(ILogger::Severity::kWARNING));
 
-	////如果设备支持INT8精度，则使用INT8精度
+	//Use INT8 precision if the device supports it
 	//if (builder->platformHasFastInt8())
 	//{
 	//	builder->setInt8Mode(true);
 	//	builder->setInt8Mode(dataType == DataType::kINT8);
-	//	builder->setInt8Calibrator(calibrator);//校准器接口
+	//	builder->setInt8Calibrator(calibrator);
 	//};
 
 
 	IBuilderConfig*  config(builder->createBuilderConfig());
 	config->setMaxWorkspaceSize(64 * 1024 * 1024);
-	config->setFlag(BuilderFlag::kFP16);   //设置量化类型
+	config->setFlag(BuilderFlag::kFP16);  
 
 	engine = builder->buildEngineWithConfig(*network, *config);
 
@@ -87,7 +87,8 @@ void TRTruntime::DeserializeModel(const std::string & trtFileName)
 	fin.read(buff, size);
 	fin.close();
 	IRuntime* runtime = createInferRuntime(logger);
-	initLibNvInferPlugins(&logger, "");   //必须加上这一句才能反序列化成功，加载官方自定义的层
+	//This line must be added for the deserialization to succeed and load the official custom layer
+	initLibNvInferPlugins(&logger, "");   
 	engine = runtime->deserializeCudaEngine((void *)buff, size, NULL);
 	delete buff;
 	cout << "deserialize model successful!!!" << endl;
@@ -144,22 +145,21 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor)
 		stream);
 
 	
-	//cout << "1111" << endl;
-	float prob[1 * 2 * IMG_SIZE * IMG_SIZE];   //如果更换模型 需要改这里的参数
+	//If you change the image size, you need to change the parameters here
+	float prob[1 * 2 * IMG_SIZE * IMG_SIZE];   
 	context->enqueueV2(bindings, stream, nullptr);
 	//cout << "infer succesesful!!" << endl;
 	cudaMemcpyAsync(prob, bindings[outputId],  batchSize * heatmapNum * imgH * imgW * sizeof(float),
 		cudaMemcpyDeviceToHost, stream);
 
-	//cout << "2222" << endl;
 	
 	/* get result  */
 	
 	std::vector<float> results(std::begin(prob), std::end(prob));
 	for (int i = 0; i < heatmapNum; i++)
 	{
-		vector<float>::const_iterator First = results.begin() + i * imgH * imgW; // 找到heatmap的第一个像素
-		vector<float>::const_iterator Second = results.begin() + (i + 1) *  imgH * imgW; // 找到heatmap的末尾
+		vector<float>::const_iterator First = results.begin() + i * imgH * imgW; // find the first pixel of heatmaps
+		vector<float>::const_iterator Second = results.begin() + (i + 1) *  imgH * imgW; // find the last pixel of heatmaps
 		vector<float> result(First, Second);
 
 		auto maxPosition1 = std::max_element(result.begin(), result.end());
@@ -172,7 +172,6 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor)
 	free(data);
 	data = NULL;
 
-	//cout << "3333" << endl;
 	return;
 }
 
@@ -190,22 +189,20 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor, std:
 		stream);
 
 
-	//cout << "1111" << endl;
-	float prob[1 * 2 * IMG_SIZE * IMG_SIZE];   //如果更换模型 需要改这里的参数
+	float prob[1 * 2 * IMG_SIZE * IMG_SIZE];  
 	context->enqueueV2(bindings, stream, nullptr);
 	//cout << "infer succesesful!!" << endl;
 	cudaMemcpyAsync(prob, bindings[outputId], batchSize * heatmapNum * imgH * imgW * sizeof(float),
 		cudaMemcpyDeviceToHost, stream);
 
-	//cout << "2222" << endl;
 
 	/* get result  */
 
 	std::vector<float> results(std::begin(prob), std::end(prob));
 	for (int i = 0; i < heatmapNum; i++)
 	{
-		vector<float>::const_iterator First = results.begin() + i * imgH * imgW; // 找到heatmap的第一个像素
-		vector<float>::const_iterator Second = results.begin() + (i + 1) *  imgH * imgW; // 找到heatmap的末尾
+		vector<float>::const_iterator First = results.begin() + i * imgH * imgW; // find the first pixel of heatmaps
+		vector<float>::const_iterator Second = results.begin() + (i + 1) *  imgH * imgW; // find the last pixel of heatmaps
 		vector<float> result(First, Second);
 
 		auto maxPosition1 = std::max_element(result.begin(), result.end());
@@ -219,6 +216,5 @@ void TRTruntime::launchInference(Mat img, std::vector<Point>& outputTensor, std:
 	free(data);
 	data = NULL;
 
-	//cout << "3333" << endl;
 	return;
 }

@@ -1,4 +1,3 @@
-%% 田字格，9个点
 %% t: in tracking camera
 %% l: in low resolution camera
 %% s: stage position
