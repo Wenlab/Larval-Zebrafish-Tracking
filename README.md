@@ -52,7 +52,7 @@ NVIDIA GeForce RTX 3080
 
 <details>
 <summary> Libraries </summary>
-TensorRT 7.2.2.3  
+TensorRT 7.2.2.3   
   
 CUDA 11.1  
   
