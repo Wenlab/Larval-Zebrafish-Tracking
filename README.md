@@ -2,13 +2,13 @@
 
 The larval zebrafish tracking program for "[*All-optical interrogation of brain-wide activity in freely swimming larval zebrafish*](https://www.biorxiv.org/content/10.1101/2023.05.24.542114v1)"
 
-#### Introduction
+## Introduction
 
-This tracking system for larval zebrafish is a component of the whole system for whole brain imaging of neural activity in freely swimming larval zebrafish. It is built up in C++. The tracking program will detect the fish and control the motion stage to compensate the motion of fish. The tracking system can keep the fish brain complete in the field of view (FoV) of the XLFM in about 60 percent of the time when the fish is swimming. The main program is [CirClassExample.cpp](Track/CirClassExample.cpp). Some codes for estimation of parameters are in [setting-parameters](setting-parameters). Some codes for labelling data to train the U-Net are in [labelling-data-for-DL](labelling-data-for-DL). 
+This tracking system for larval zebrafish is a component of the whole system for whole brain imaging of neural activity in freely swimming larval zebrafish. It is built up in C++. The tracking program will detect the fish and control the motion stage to compensate the motion of fish. The tracking system can keep the fish brain complete in the field of view (FoV) of the XLFM in about 60 percent of the time when the fish is swimming. The main program is [main.cpp](Track/main.cpp). Some codes for estimation of parameters are in [setting-parameters](setting-parameters). Some codes for labelling data to train the U-Net are in [labelling-data-for-DL](labelling-data-for-DL). 
 
 ![result](figs/result.PNG)
 
-#### Pipeline
+## Pipeline
 
 ![pipeline](figs/pipeline.PNG)
 
@@ -29,7 +29,32 @@ We adopted the model predictive control (MPC) method in [(1)](https://www.nature
 
 </details>
 
-#### Contributors
+## Hardware
+
+<details>
+<summary> Tracking camera </summary>
+A high-speed camera (0.8 ms exposure time, 340 fps, Basler aca2000-340kmNIR, Germany) to capture the lateral motion of the fish.
+</details>
+
+<details>
+<summary> Frame grabber </summary>
+
+</details>
+
+<details>
+<summary> GPU </summary>
+
+</details>
+
+## Dependency
+
+<details>
+<summary>  </summary>
+
+</details>
+
+## Contributors
 - [Daguang Li](https://github.com/Ali0Li) (`hrcs@mail.ustc.edu.cn`)
 - [Kexin Qi](https://github.com/kexin2016) (``)
+- [Guodong Tan](https://github.com/tagodong) (`tagodong@mail.ustc.edu.cn`)
 - [Quan Wen](https://github.com/wenquan) (`qwen@ustc.edu.cn`)

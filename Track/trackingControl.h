@@ -101,7 +101,7 @@ struct trackingParams
 
 	}
 }; 
-//��ͨ������ȡ��voltage��ֵ����params�ṹ��
+//
 void getVoltages(trackingParams* params, float voltage_x, float voltage_y);
 /*****************************************************************************/
 /* This class provides a view to copy the offscreen surface to */

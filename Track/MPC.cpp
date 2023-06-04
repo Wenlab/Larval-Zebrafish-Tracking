@@ -74,15 +74,6 @@ Point2d MPC(int m, int predict_length, vector<Point2d> H, double gammaX, double 
 	c1.x = x1.at<double>(0, 0);
 	c1.y = x2.at<double>(0, 0);
 
-	//to be deleted
-		//display some results
-		//ofstream output_command_position;
-		//output_command_position.open("E:\\output_command_position.txt", ios::out|ios::app);
-		//output_command_position << 
-		//	c1.x << ", " << c1.y <<  
-		//	", " << position_history.back().x << ", " << position_history.back().y << endl;
-		//output_command_position.close();
-
 	return c1;
 }
 
@@ -151,20 +142,6 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 		}
 
 
-		//to be deleted
-		//display some results
-		 //ofstream output_fish_v_predicted, output_fish_tr_predicted;
-		 //output_fish_v_predicted.open("E:\\output_fish_v_predicted.txt", ios::out|ios::app);
-		 //output_fish_tr_predicted.open("E:\\output_fish_tr_predicted.txt", ios::out|ios::app);
-		 //output_fish_v_predicted << 0*fish_direction_average.x << ", " << 0*fish_direction_average.y << endl;
-		 //output_fish_tr_predicted << 
-		 //	predicted_fish_tr[0].x << ", " << predicted_fish_tr[0].y << 
-		 //	", " << 0 << ", " << 0 << 
-		 //	", " << fish_direction_history.back().x << ", " << fish_direction_history.back().y << 
-		 //	", " << fish_direction_average.x << ", " << fish_direction_average.y <<
-		 //	", " << 0 << ", " << 0 <<
-		 //	", " << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << ", ";
-
 		/*shift yolk to head*/
 		it2 = fish_direction_history.end() - 1;
 		for (it = predicted_fish_tr.begin(); it != predicted_fish_tr.end(); it++)
@@ -172,12 +149,6 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 			it->x += it2->x*shift_head2yolk;
 			it->y += it2->y*shift_head2yolk;
 		}
-
-		//to be deleted
-		//output_fish_tr_predicted << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << endl;
-		//output_fish_v_predicted.close();
-		//output_fish_tr_predicted.close();
-
 
 		return;
 	}
@@ -224,24 +195,6 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 		predicted_fish_tr.push_back(predicted_fish_pos_t);
 	}
 
-
-
-	//to be deleted
-		//display some results
-		 //ofstream output_fish_v_predicted, output_fish_tr_predicted;
-		 //output_fish_v_predicted.open("E:\\output_fish_v_predicted.txt", ios::out|ios::app);
-		 //output_fish_tr_predicted.open("E:\\output_fish_tr_predicted.txt", ios::out|ios::app);
-		 //output_fish_v_predicted << fish_velocity_average_proj*fish_direction_average.x << ", " << fish_velocity_average_proj*fish_direction_average.y << endl;
-		 //output_fish_tr_predicted << 
-		 //	predicted_fish_tr[0].x << ", " << predicted_fish_tr[0].y << 
-		 //	", " << fish_position_proj.x << ", " << fish_position_proj.y << 
-		 //	", " << fish_direction_history.back().x << ", " << fish_direction_history.back().y << 
-		 //	", " << fish_direction_average.x << ", " << fish_direction_average.y <<
-		 //	", " << fish_position_average.x << ", " << fish_position_average.y <<
-		 //	", " << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << ", ";
-
-
-
 		/*shift yolk to head*/
 	it2 = fish_direction_history.end() - 1;
 	for (it = predicted_fish_tr.begin(); it != predicted_fish_tr.end(); it++)
@@ -249,17 +202,6 @@ void predict_fish_tr(vector<Point2d> &predicted_fish_tr,
 		it->x += it2->x*shift_head2yolk;
 		it->y += it2->y*shift_head2yolk;
 	}
-
-
-
-
-	//to be deleted
-		//output_fish_tr_predicted << predicted_fish_tr[1].x << ", " << predicted_fish_tr[1].y << endl;
-		//output_fish_v_predicted.close();
-		//output_fish_tr_predicted.close();
-
-
-
 
 }
 

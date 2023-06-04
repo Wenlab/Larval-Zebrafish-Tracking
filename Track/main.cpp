@@ -1,35 +1,7 @@
-/***************************************************************************
-*
-* CirClassExample.cpp
-*
-* This application uses the CircularInterface class to acquire images
-* into a circular buffer. This application is equivalent to the Circular.c
-* application, the difference being the Circular.c application
-* uses the Bi API and this application uses the CircularInterface class.
-*
-* There are several advantages to using the CircularInterface class
-* that are demonstrated in this application.
-* The advantages being:
-*	1. Fewer method/function calls to accomplish sequence capture.
-*	2. No need to call cleanup methods/functions.
-*	3. Fewer method/function parameters.
-*	4. Improved error handling by throwing exceptions.
-*
-* We encouraged you to compare this application to the Circular.c
-* application to see the advantages for yourself.
-*
-* This example demonstrates the use of CircularInterface class.
-*
-* Copyright (C) 2004 by BitFlow, Inc.  All Rights Reserved.
-*
-***************************************************************************/
-
-
-
 // note that: don't minmize the cmd window, ortherwise the process will be error!!!
 
 #include "stdafx.h"
-#include "CircClassExample.h"
+#include "main.h"
 #include "CircularInterface.h"
 #include <conio.h>
 #include "CiApi.h"
@@ -160,18 +132,6 @@ vector<Point2d> fish_tr_history_c;
 vector<Point2d> fish_direction_history_c;
 
 // parameters for MPC
-//int command_history_length = 30;
-//int predict_length = 6;
-//int fish_history_length = 4;
-//double gammaX = 0.03;
-//double gammaY = 0.03;
-//double max_command = 10.0;
-//int max_shift_head2yolk = 29;
-//double scale_x = 1.0 / 30.0;
-//double scale_y = 1.0 / 30.0;
-//double theta = atan(-0.043);
-//double scale_x2 = 1.0 / 10000.0;
-//double scale_y2 = 1.0 / 12800.0;
 Point dst_fish_position = Point(160, 160);
 
 //GUI
@@ -222,7 +182,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 		try
 		{
-			//初始化board
+			// initialize board
 			cout << "Creating instance of circular interface." << endl;
 			CircularInterface board(boardNum, numBuffers, errorMode,
 				cirSetupOptions);
@@ -280,9 +240,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pFrameDoneThread == BFNULL)
 				return 1;
 
-			//board.cirControl(BISTART, BiAsync);
-			//board.cirControl(BIPAUSE, BiAsync);//pause and manually control the stage when start the program
-
 			pFrameIMGThread = AfxBeginThread(TRTImageProcessThread, &bt, THREAD_PRIORITY_HIGHEST);
 			if (pFrameIMGThread == BFNULL)
 				return 1;
@@ -303,19 +260,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			if (pTCPClientThread == BFNULL)
 				return 1;
 
-			//printf("\nPress G (as in Go) to start Acquisition ");
-			//printf("	Press S to Stop Acquisition \n");
-			//printf("Press P to Pause				Press C to Continue\n");
-			//printf("Press A to Abort\n");
-			//printf("Press X to exit test\n\n");
-
-
-			//cout << "endTest: " << endTest << endl;
 			board.cirControl(BISTART, BiAsync); // start the board at the first time
 			while (!endTest)
 			{
-				//cout << "The main loop... " << endl;
-				
 				// Wait here for a keyboard stroke
 				while (!params->flag_cb && !endTest)
 				{
@@ -329,7 +276,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 						if (cirHandle.FrameCount % 10000 == 0)
 							cout << "current num:" << bt.frameNum << endl;
 					}
-					//cout << "Waiting for trigger..." << endl;
 				}
 				params->flag_cb = false;//as a trigger, set false immediately after the waiting loop
 				cout << "trigger works!" << endl;
@@ -346,12 +292,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 				switch (toupper(ch))
 				{
-				//case 'G': // Start acquisition
-				//	TRTflag = 1;
-				//	board.cirControl(BISTART, BiAsync);
-				//	cout << "Circular Acquisition Started." << endl;
-				//	break;
-
 				case 'P':// Pause acquisition
 					TRTflag = 0;
 					//board.cirControl(BIPAUSE, BiAsync);
@@ -363,16 +303,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 					//board.cirControl(BIRESUME, BiAsync);
 					cout << "Circular Acquisition Resumed." << endl;
 					break;
-
-				//case 'S':// Stop acquisition
-				//	TRTflag = 2;
-				//	board.cirControl(BISTOP, BiAsync);
-				//	break;
-
-				//case 'A':// Abort acquisition
-				//	TRTflag = 2;
-				//	board.cirControl(BIABORT, BiAsync);
-				//	break;
 
 				case 'X':// Exit application
 					TRTflag = 2;
@@ -533,61 +463,12 @@ UINT WaitForBufferDone(LPVOID lpdwParam)
 					}
 				}
 
-				/*
-				BFU32 pnextnum = -1;
-				PBFQNode currentNote = cirHandle.pNode;
-				BFU32 pnum = currentNote->BufferNumber;
-				cout << "start num: " << pnum << endl;
-				cout << endl;
-				int a = 0;
-				while (a!=5)
-				{
-					BFU32 currentnum = currentNote->BufferNumber;
-					cout << "current BufferNumber: " << currentnum << endl;
-					cout << "status: " << currentNote->Status << endl;
-					currentNote = currentNote->Next;
-					pnextnum = currentNote->BufferNumber;
-					cout << "next BufferNumber: " << pnextnum << endl;
-					cout << endl;
-					a++;
-				}
-				cout << "-----------------------------------" << endl;
-
-				*/
-				
-				/*
-				if (board->getNumFramesCaptured()%1000==0)
-				{
-					cout << "caputured image num: " << board->getNumFramesCaptured() << endl;
-				}
-				*/
-
-				// single thread:
-
-				/*
-				//TOdO: add track code
-				vector<cv::Point> outputVec;
-				
-				void* image = cirHandle.pBufData;
-
-				trt.launchInference(image, outputVec);
-
-				cout << "frame num:" << cirHandle.FrameCount << endl;
-				*/
-
-
 				// Mark the buffer as AVAILABLE after processing
 				board->setBufferStatus(cirHandle, BIAVAILABLE);
 
-				// output some stats
-				//cout << setfill('0');
-				
-				//cout << "Buffer: " << setw(8) << cirHandle.BufferNumber << " ";
-				//cout << "captured num: " << board->getNumFramesCaptured() << endl;
 			}
 
 			rv = board->waitDoneFrame(INFINITE, &cirHandle);
-			//cout << "grab thread" << endl;
 
 			GetLocalTime(&currentTime);
 			sprintf(time_stamp_s, "%d_%d_%d_%d_%d", currentTime.wDay, currentTime.wHour, currentTime.wMinute, currentTime.wSecond, currentTime.wMilliseconds);
@@ -595,7 +476,6 @@ UINT WaitForBufferDone(LPVOID lpdwParam)
 			image_time_pair image_time_pair_temp;
 			image_time_pair_temp.image = temp.clone();
 			strcpy(image_time_pair_temp.time_stamp_s, time_stamp_s);
-			//cout << temp.empty() << endl;
 			images_captured.push(image_time_pair_temp);
 		}
 	}
@@ -626,7 +506,6 @@ UINT CirErrorThread(LPVOID lpdwParam)
 
 UINT FrameGUIThread(LPVOID lpdwParam)
 {
-	//trackingParams* params = (trackingParams*)lpdwParam;
 	make_window(params);
 	cout << "Start Fl::run()... " << endl;
 	Fl::run();
@@ -638,7 +517,7 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 {
 	Mat test4;
 
-	//加载套接字
+	// load Winsock
 	WSADATA wsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 	{
@@ -646,15 +525,15 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 		return 1;
 	}
 
-	//创建用于监听的套接字
+	// creat the socket for listening
 	SOCKET sockSrv = socket(AF_INET, SOCK_STREAM, 0);
 
 	SOCKADDR_IN addrSrv;
 	addrSrv.sin_family = AF_INET;
-	addrSrv.sin_port = htons(TRACK_SERVER_PORT); //1024以上的端口号
+	addrSrv.sin_port = htons(TRACK_SERVER_PORT); //above 1024
 	addrSrv.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 
-	if (::bind(sockSrv, (LPSOCKADDR)&addrSrv, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {//为了区别于std::bind，加了个::。
+	if (::bind(sockSrv, (LPSOCKADDR)&addrSrv, sizeof(SOCKADDR_IN)) == SOCKET_ERROR) {//to distinguish from std::bind, add a '::'
 		printf("Failed bind:%d\n", WSAGetLastError());
 		return 1;
 	}
@@ -667,11 +546,10 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 	SOCKADDR_IN addrClient;
 	int len = sizeof(SOCKADDR);
 
-	//等待客户请求到来    
+	// waiting for client    
 	SOCKET sockConn = accept(sockSrv, (SOCKADDR *)&addrClient, &len);
 	if (sockConn == SOCKET_ERROR) {
 		printf("Accept failed:%d", WSAGetLastError());
-		//break;
 	}
 
 	printf("Accept client IP:[%s]\n", inet_ntoa(addrClient.sin_addr));
@@ -693,15 +571,13 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 	cout << "File(stage position) openning succeeds!\n";
 	mkdir(path_image);
 	cout << "Mkdir for image recording succeeds!\n";
-	//接收数据（帧号）并存储光栅尺读数
+	// receiving and recording
 	while (!endTest && !flag_client_closed)
 	{
-		//memset(recvBuf, 0, sizeof(recvBuf));
 		if (recv(sockConn, recvBuf, sizeof(recvBuf), 0)<=0)//receive the trigger
 		{
 			flag_client_closed = true;//whether the client socket is closed
 		}
-		//cout << "recvBuf: " << recvBuf << endl;
 		i = atoi(recvBuf);
 		output << i << ", " << "x: " << consoleread.coordata[0] << ", " << "y: " << -consoleread.coordata[1];//record the frame number and coordinates
 		output << ", detection: " << params->fish_detection << ", head: " << params->head << ", yolk: " << params->yolk;
@@ -712,12 +588,9 @@ UINT RecordCoorThread(LPVOID lpdwParam)
 		if (i % 1 == 0)
 		{
 			test4 = test.clone();
-			//cv::circle(test4, params->head, 6, 128, 2);
-			//cv::circle(test4, params->yolk, 3, 128, 2);
 			imwrite(path_image + cv::format("%.6d", i) + ".jpg", test4);
 		}
 
-		//cout << i << " " << consoleread.coordata[0] << " " << -consoleread.coordata[1] << endl;
 	}
 	output.close();
 
@@ -748,17 +621,12 @@ UINT RecordFrameThread(LPVOID lpdwParam)
 	{
 		if (!images_captured.empty())
 		{
-			//GetLocalTime(&currentTime);
-			//time_stamp = ((((currentTime.wDay * 24 + currentTime.wHour) * 60 + currentTime.wMinute) * 60) + currentTime.wSecond) * 1000 + currentTime.wMilliseconds;
-			//sprintf(time_stamp_s, "%d_%d_%d_%d_%d", currentTime.wDay, currentTime.wHour, currentTime.wMinute, currentTime.wSecond, currentTime.wMilliseconds);
 			if (images_captured.front().image.empty())
 			{
 				cout << "Image is empty!!!" << endl;
 				images_captured.pop();
 				continue;
 			}
-			//imwrite(strcat(strcat(path_image, time_stamp_s), ".png"), images_captured.front());
-			//sprintf(path_image, "H:\\340fps_tracking\\%d_%d_%d-%d_%d_%d\\", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
 			writer << images_captured.front().image;
 			time_stamps << images_captured.front().time_stamp_s << endl;
 			images_captured.pop();
@@ -777,8 +645,6 @@ UINT TCPClientThread(LPVOID lpdwParam)
 	cout << "TCP client say hello!!" << endl;
 	client.initialize();
 
-	//int sendData = 166;
-	//sprintf_s(sendBuff, "%06d", sendData);
 	while (1)
 	{
 		cout << "waiting for connect..." << endl;
@@ -791,8 +657,6 @@ UINT TCPClientThread(LPVOID lpdwParam)
 				int sendData = params->headingAngle;
 				sprintf_s(sendBuff, "%06d", sendData);
 				client.sendMsg(sendBuff, sizeof(sendBuff));
-				//client.recvMsg();
-				//sendData += 1;
 				sprintf_s(sendBuff, "%06d", sendData);
 
 				char revSerData[200];
@@ -818,7 +682,6 @@ UINT TCPClientThread(LPVOID lpdwParam)
 UINT TRTImageProcessThread(LPVOID lpdwParam)
 {
 	bitflowTRTStru* bt = (bitflowTRTStru*)lpdwParam;
-	//CircularInterface* board = (CircularInterface*)lpdwParam;
 
 	cout << "start TRT model process..." << endl;
 	BFU32 frameCount = -2;
@@ -833,20 +696,12 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 	{
 		while (1)
 		{
-			 
-			//if (bt->frameNum % 1000 == 0 && bt->frameNum!=0)
 			if(bt->frameNum==1)
 				cout << "frameCount: " << frameCount << endl;
-
-			 //cout << TRTflag << endl;
 
 			if (TRTflag == 0)// manually control the stage
 			{
 				consoleread.ConCoorRead();
-				//if (params->voltage_x != 0)
-				//{
-				//	cout << "volInput: " << params->voltage_x << ", " << params->voltage_y << endl;
-				//}
 				voltage.volInput(params->voltage_x, params->voltage_y);
 
 				// clear the history
@@ -863,24 +718,18 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			}
 			else if (TRTflag  == 1)
 			{
-				//
-				// cout << "1:" << bt->frameNum << endl;
-				//cout << "Tracking branch begins." << endl;
 				if (frameCount != bt->frameNum && bt->imageDataBuffer != NULL)
 				{
 					// elapsed time
-					LARGE_INTEGER timeStart;    //开始时间  
-					LARGE_INTEGER timeEnd,timeEnd1,timeEnd2,timeEnd3,timeEnd4,timeEnd5,timeEnd6,timeEnd7;      //结束时间  
-					LARGE_INTEGER frequency;    //计时器频率  
+					LARGE_INTEGER timeStart;
+					LARGE_INTEGER timeEnd,timeEnd1,timeEnd2,timeEnd3,timeEnd4,timeEnd5,timeEnd6,timeEnd7;
+					LARGE_INTEGER frequency;
 					QueryPerformanceFrequency(&frequency);  
-					double quadpart = (double)frequency.QuadPart;//计时器频率  
+					double quadpart = (double)frequency.QuadPart;
 					QueryPerformanceCounter(&timeStart);  
 
 					// read the coordinates of the current console location.
-					//cout << "read a pair of console coordinates ..." << endl;
 					consoleread.ConCoorRead();
-					//printf("\n channel %u Current UpDown count: %u\n", 0, consoleread.coordata[0]);
-					//printf("\n channel %u Current UpDown count: %u\n", 1, consoleread.coordata[1]);
 					if (position_history.size() != params->fish_history_length)// If the size of position_history is not equal to fish_history_length, initialize it with the data of the present frame.
 					{
 						position_history.clear();
@@ -895,7 +744,6 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					}
 
 					QueryPerformanceCounter(&timeEnd1);
-					//cout << frameCount << "    " << bt->frameNum << endl;
 					test.data = (uchar*) bt->imageDataBuffer;
 					GetLocalTime(&currentTime_l);
 					sprintf(time_stamp_l_s, "%d_%d_%d_%d_%d", currentTime_l.wDay, currentTime_l.wHour, currentTime_l.wMinute, currentTime_l.wSecond, currentTime_l.wMilliseconds);
@@ -941,14 +789,8 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double elapsed_convertion = (timeEnd2.QuadPart - timeEnd1.QuadPart) / quadpart;
 					double elapsed_process = (timeEnd3.QuadPart - timeEnd2.QuadPart) / quadpart;
 
-					//imwrite("D:/tgd/Track-TEST/testImg/"+cv::format("%.4d", frameCount) + ".jpg", test2);
-					
-
 					frameCount = bt->frameNum;
-					//if (frameCount % 10 == 0)
-					//	cout << "processed frame count: " << bt->frameNum <<endl;
 
-					
 					//save image to test img process
 					if (DEBUG_FLAG)
 					{
@@ -968,8 +810,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 						cout << "fish detection error!" << endl;
 						cout << "head: " << outputVec[0] << endl;
 						cout << "yolk: " << outputVec[1] << endl << endl;
-						//voltage.volInput(0, 0);//Stop the stage while fish detection error.
-						voltage.volInput(params->voltage_x, params->voltage_y);//找不到鱼的时候，改手动控制
+						voltage.volInput(params->voltage_x, params->voltage_y);//no fish detected, switch to manual mode
 						continue;//Do nothing else while fish detection error.
 					}
 					else
@@ -1023,8 +864,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 					double elapsed_MPC = (timeEnd5.QuadPart - timeEnd4.QuadPart) / quadpart;
 
 					// Output the voltage
-					//voltage.volInput(voltage_x, voltage_y);
-					if (params->voltage_x != 0 || params->voltage_y != 0)//如果有手动控制输入，优先按照手动控制
+					if (params->voltage_x != 0 || params->voltage_y != 0)//manual input first
 					{
 						voltage.volInput(params->voltage_x, params->voltage_y);
 					}
@@ -1076,7 +916,7 @@ UINT TRTImageProcessThread(LPVOID lpdwParam)
 			{
 				cout << "frameCount processed: " << frameCount_processed << endl << endl;
 				cout << "break" << endl;
-				exit(0);//最好不要这样，但是不知道Fl::run()怎么停，暂时在这里退出程序。
+				exit(0);
 				break;
 			}
 		}

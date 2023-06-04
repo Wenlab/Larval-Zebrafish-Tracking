@@ -56,12 +56,9 @@ int voltageControlPanel::handle(int event)
 	if (!offscreen_buffer) return 1;
 	retvalue = Fl_Box::handle(event);
 
-
-	//float voltage_x = 0.0;
-	//float voltage_y = 0.0;
 	float x_bias = 400;
 	float y_bias = 50;
-	if (1)  //手动控制（改为->无论哪种模式，都可以手动控制）
+	if (1)  // manual mode
 	{
 		switch (event)
 		{
@@ -72,17 +69,13 @@ int voltageControlPanel::handle(int event)
 			y = Fl::event_y();
 			g_voltage_x = (float(x) - x_bias - panel_size / 2) / panel_size * maxVoltage * 2;
 			g_voltage_y = (float(y) - y_bias - panel_size / 2) / panel_size * maxVoltage * 2;
-			//cout << g_voltage_y << "   " << g_voltage_x << endl;
-			g_params->voltage_x = -g_voltage_x;  //将X轴反过来
+			g_params->voltage_x = -g_voltage_x;  // flip x axis
 			g_params->voltage_y = g_voltage_y;
 
 			break;
-
-			//cout << g_params->command_history_length << endl;
 		default:
 			g_voltage_x = 0;
 			g_voltage_y = 0;
-			//cout << g_voltage_y << "   " << g_voltage_x << endl;
 			g_params->voltage_x = g_voltage_x;
 			g_params->voltage_y = g_voltage_y;
 		
@@ -96,27 +89,6 @@ int voltageControlPanel::handle(int event)
 			retvalue = 1;
 			break;
 		}
-		//switch (event)
-		//{
-		//case FL_PUSH:
-		//	if (push1st == 0)
-		//	{
-		//		push1st = 1;
-		//		break;
-		//	}
-		//	else
-		//	{
-		//		push1st = 0;
-		//	}
-		//case FL_DRAG:
-		//{
-		//	push1st = 0; //clear if dragging
-		//}
-		//break;
-		//default:
-		//	//redraw();
-		//	break;
-		//}
 	}
 	return retvalue;
 } // handle
@@ -133,47 +105,44 @@ void getVoltages(trackingParams* params, float voltage_x, float voltage_y)
 void make_window(trackingParams* params)
 {
 	g_params = params;
-	//fl_register_images();
 	win = new Fl_Double_Window(800, 500, "Tracking Control");
-	//Fl_Window* win = new Fl_Double_Window(800, 500, "Tracking Control");
 	win->begin();
-	//Fl_Button* initialize = new Fl_Button(10, 450, 70, 30, "&I&nitialize"); //child 0    : 1st widget
 	Fl_Button*  apply = new Fl_Button(40, 460, 70, 30, "A&pply"); //child 0   : 2nd widget
 	Fl_Button* ifTracking = new Fl_Button(130, 460, 100, 30, "&TrackingOn"); //child 1    : 3rd widget
 
 
 	Fl_Input* command_history_length = new Fl_Input(200, 10, 120, 20, "command_history_length");  //child 2
-	command_history_length->value(to_string(params->command_history_length).c_str());	//基本不变
+	command_history_length->value(to_string(params->command_history_length).c_str());
 
 	Fl_Input* predict_length = new Fl_Input(200, 40, 120, 20, "predict_length");  //child 3
-	predict_length->value(to_string(params->predict_length).c_str());	//10以内
+	predict_length->value(to_string(params->predict_length).c_str());	//below 10
 
 	Fl_Input* fish_history_length = new Fl_Input(200, 70, 120, 20, "fish_history_length");  //child 4
-	fish_history_length->value(to_string(params->fish_history_length).c_str());	//10以内
+	fish_history_length->value(to_string(params->fish_history_length).c_str());	//below 10
 
 	Fl_Input* gammaX = new Fl_Input(200, 100, 120, 20, "gammaX");   //child 5
-	gammaX->value(to_string(params->gammaX).c_str());	//0.015~0.05, step 0.005或0.001
+	gammaX->value(to_string(params->gammaX).c_str());	//0.015~0.05, step 0.005 or 0.001
 	Fl_Input* gammaY = new Fl_Input(200, 130, 120, 20, "gammaY");  //child 6
-	gammaY->value(to_string(params->gammaY).c_str());	//0.015~0.05, step 0.005或0.001
+	gammaY->value(to_string(params->gammaY).c_str());	//0.015~0.05, step 0.005 or 0.001
 
 	Fl_Input* max_command = new Fl_Input(200, 160, 120, 20, "max_command");  //child 7
-	max_command->value(to_string(params->max_command).c_str()); 	// 基本不变
+	max_command->value(to_string(params->max_command).c_str());
 
 	Fl_Input* max_shift_head2yolk = new Fl_Input(200, 190, 120, 20, "max_shift_head2yolk");  //child 8
-	max_shift_head2yolk->value(to_string(params->max_shift_head2yolk).c_str());  //50以内
+	max_shift_head2yolk->value(to_string(params->max_shift_head2yolk).c_str());  //below 50
 
 	Fl_Input* scale_x = new Fl_Input(200, 220, 120, 20, "scale_x");  //child 9
-	scale_x->value(to_string(params->scale_x).c_str());  //分母大概在一个数量级内变化
+	scale_x->value(to_string(params->scale_x).c_str());
 	Fl_Input* scale_y = new Fl_Input(200, 250, 120, 20, "scale_y");   //child 10
-	scale_y->value(to_string(params->scale_y).c_str());  //分母大概在一个数量级内变化
+	scale_y->value(to_string(params->scale_y).c_str());
 
 	Fl_Input* theta = new Fl_Input(200, 280, 120, 20, "theta");     //child 11
-	theta->value(to_string(params->theta).c_str());   //+-0.5，两位有效数字
+	theta->value(to_string(params->theta).c_str());   //+-0.5
 
 	Fl_Input* scale_x2 = new Fl_Input(200, 310, 120, 20, "scale_x2");   //child 12
-	scale_x2->value(to_string(params->scale_x2).c_str());   //基本不变
+	scale_x2->value(to_string(params->scale_x2).c_str());
 	Fl_Input* scale_y2 = new Fl_Input(200, 340, 120, 20, "scale_y2");   //child 13
-	scale_y2->value(to_string(params->scale_y2).c_str());   //基本不变
+	scale_y2->value(to_string(params->scale_y2).c_str());
 
 	Fl_Input* dst_fish_position_x = new Fl_Input(200, 370, 120, 20, "dst_fish_position_x");  //child 14
 	dst_fish_position_x->value(to_string(params->dst_fish_position_x).c_str());  //0~360
@@ -251,25 +220,6 @@ void apply_cb(Fl_Widget* o, void *data)
 
 	Fl_Input* shift_head = (Fl_Input*)b->parent()->child(17);
 	params->shift_head = atof(shift_head->value());
-
-	//std::cout << params->voltage_x << std::endl;
-	//std::cout << params->command_history_length << std::endl;
-	//std::cout << params->predict_length << std::endl;
-	//std::cout << params->fish_history_length << std::endl;
-	//std::cout << params->gammaX<< std::endl;
-	//std::cout << params->gammaY << std::endl;
-	//std::cout << params->max_command << std::endl;
-	//std::cout << params->max_shift_head2yolk << std::endl;
-	//std::cout << params->scale_x << std::endl;
-	//std::cout << params->scale_y << std::endl;
-	//std::cout << params->theta << std::endl;
-	//std::cout << params->scale_x2 << std::endl;
-	//std::cout << params->scale_y2 << std::endl;
-	//std::cout << params->dst_fish_position_x << std::endl;
-	//std::cout << params->dst_fish_position_y << std::endl;
-
-	//cout << "apply_cb g_params voltage: " << g_params->voltage_x << ", " << g_params->voltage_y << endl;
-	//cout << "apply_cb params voltage: " << params->voltage_x << ", " << params->voltage_y << endl;
 }
 
 
