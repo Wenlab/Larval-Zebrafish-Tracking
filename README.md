@@ -13,7 +13,8 @@ This tracking system for larval zebrafish is a component of the whole system for
 <details>
 <summary> Detection of the fish </summary>
 
-We use a simple U-Net to detect fish head and yolk in real time. The codes for training and the trained network are in [U-net](U-net). 
+We use a simple U-Net to detect fish head and yolk in real time. The model contains only two downsampling layers and two upsampling layers, which improves the detection speed. 
+  The heat map is used as the output of the model, showing the location of the target point and the confidence level. The codes for training and the trained network are in [U-net](U-net). 
 
 </details>
 
