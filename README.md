@@ -23,7 +23,9 @@ We use a U-Net to detect fish in real time. The codes for training and the train
 <details>
 <summary> Motion stage control </summary>
 
-We adopted the model predictive control (MPC) method in [(1)](https://www.nature.com/articles/nmeth.4429) to control the X-Y motorized stage. We modeled the motion of the stage and the fsh, and then selected the optimal stage input by minimizing future tracking error. This part of code is [MPC_main.cpp](Track\MPC_main.cpp) which will call [MPC.cpp](Track\MPC.cpp).
+We adopted the model predictive control (MPC) method in [(1)](https://www.nature.com/articles/nmeth.4429) to control the X-Y motorized stage. We modeled the motion of the stage and the fsh, and then selected the optimal stage input by minimizing future tracking error. The main program of his part is [MPC_main.cpp](Track/MPC_main.cpp) which will call [MPC.cpp](Track/MPC.cpp).
+
+1. Kim, D. H., Kim, J., Marques, J. C., Grama, A., Hildebrand, D. G., Gu, W., Li, J. M., and Robson, D. N. Pan-neuronal calcium imaging with cellular resolution in freely swimming zebrafsh. *Nature methods*, 14(11):1107¨C1114, 2017.
 
 </details>
 
