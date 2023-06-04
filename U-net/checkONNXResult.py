@@ -44,5 +44,5 @@ if __name__ == "__main__":
         for i in range(1000):
             outputs = ort_session.run(None,{ 'input' : example_source}) 
         T2 = time.clock()
-        print('模型运行1000次:%s毫秒' % ((T2 - T1)*1000))
-        print('平均时间:%s毫秒' % ((T2 - T1)))
+        print('1000 run:%s ms' % ((T2 - T1)*1000))
+        print('average:%s ms' % ((T2 - T1)))

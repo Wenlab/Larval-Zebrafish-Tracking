@@ -15,7 +15,7 @@ class DoubleConv(nn.Module):
     def __init__(self,in_channels,out_channels,channel_reduce=False):
         super(DoubleConv, self).__init__()
 
-        # 通道减少的系数
+        # channel reduction factor
         coefficient = 2 if channel_reduce else 1
 
         self.down = nn.Sequential(

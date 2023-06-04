@@ -94,7 +94,7 @@ scatter(v(:,1),v_predict(:,1));
 
 
 
-%% 验证position_predict的计算是否正确
+%% check position_predict
 for t=1:n-1
 	tao_min = 1;
 	if t-m+1>tao_min

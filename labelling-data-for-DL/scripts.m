@@ -139,7 +139,7 @@ for aa=1:length(videoFolders)
             result(i).head = head;
             result(i).yolk = yolk;
         end 
-        if('s'==get(gcf,'CurrentCharacter'))  %退回到前一帧
+        if('s'==get(gcf,'CurrentCharacter'))  % return to last frame
             i=i-2;
         end
         i=i+1;
@@ -165,28 +165,3 @@ for i=1:length(videoFolders)
     augmentData(path_videoDataRoot,result);
 
 end
-
-%% some codes for format transformation, padding etc.
-% path_root = 'D:/Daguang Li/tracking by deep learning/labelling data/';
-% path_src = [path_root,'raw data/'];
-% filename_in = 'complex_background_maze.mov';
-% v = VideoReader([path_src,filename_in]);
-% filename_out = filename_in;
-% filename_out(end-3:end) = [];
-% filename_out = [filename_out,'.avi'];
-% writer = VideoWriter([path_src,filename_out],'Uncompressed AVI');
-% writer.FrameRate = v.FrameRate;
-% open(writer);
-% while hasFrame(v)
-% img = readFrame(v);
-% writeVideo(writer,img);
-% end
-% close(writer);
-
-% for i = 1:num_keyframes
-%     C = KeyFrames(:,:,:,i);
-%     C = rgb2gray(C);
-%     D = padarray(C,[44 80],0,'both');
-%     filename_keyframe = [prefix , '_' , num2str(i,'%05d') , '.' , extension];
-%     imwrite(D,filename_keyframe);
-% end

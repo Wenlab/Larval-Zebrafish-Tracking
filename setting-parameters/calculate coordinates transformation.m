@@ -44,10 +44,6 @@ Pt = [xt',yt'];
 Pl = [xl',yl'];
 tform = fitgeotrans(Pt,Pl,'affine')
 
-1.50655866646341	-0.0360778157208885	0
-0.0300483527916585	1.49554223192162	0
--12.4631350975862	-1.54768867142862	1
-
 %% for the low resolution camera
 %% fitline to calculate the rotation of axis
 %% the point is moving along one of the motion axises
