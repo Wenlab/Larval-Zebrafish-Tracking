@@ -4,7 +4,7 @@ The larval zebrafish tracking program for "[*All-optical interrogation of brain-
 
 ## Introduction
 
-This tracking system for larval zebrafish is a component of the whole system for whole brain imaging of neural activity in freely swimming larval zebrafish. It is built up in C++. The tracking program will detect the fish and control the motion stage to compensate the motion of fish. The tracking system can keep the fish brain complete in the field of view (FoV) of the XLFM in about 60 percent of the time when the fish is swimming. The main program is [main.cpp](Track/main.cpp). Some codes for estimation of parameters are in [setting-parameters](setting-parameters). Some codes for labelling data to train the U-Net are in [labelling-data-for-DL](labelling-data-for-DL). 
+This tracking system for larval zebrafish is a component of the whole system for whole brain imaging of neural activity in freely swimming larval zebrafish. It is built up in C++. The tracking program will detect the fish and control the motion stage to compensate the motion of fish. With U-net based detection model and MPC control, our tracking system is highly reliable and can be used in a variety of behavioral experiments. The main program is [main.cpp](Track/main.cpp). Some codes for estimation of parameters are in [setting-parameters](setting-parameters). Some codes for labelling data to train the U-Net are in [labelling-data-for-DL](labelling-data-for-DL). 
 
 ![pipeline](figs/pipeline.PNG)
 
