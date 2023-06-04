@@ -58,7 +58,7 @@ NVIDIA GeForce RTX 3080
 - CUDNN 8.2.0
 - OpenCV 4.55
 - FLTK 1.4.0  
-  
+- Bitflow SDK 6.5
 
 </details>
 
