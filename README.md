@@ -52,15 +52,12 @@ NVIDIA GeForce RTX 3080
 
 <details>
 <summary> Libraries </summary>
-TensorRT 7.2.2.3   
-  
-CUDA 11.1  
-  
-CUDNN 8.2.0  
-  
-OpenCV 4.55  
-  
-FLTK 1.4.0  
+
+- TensorRT 7.2.2.3
+- CUDA 11.1
+- CUDNN 8.2.0
+- OpenCV 4.55
+- FLTK 1.4.0  
   
 
 </details>
