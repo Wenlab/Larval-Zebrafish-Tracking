@@ -4,7 +4,7 @@ The larval zebrafish tracking program for "[*All-optical interrogation of brain-
 
 ## Introduction
 
-This tracking system for larval zebrafish is a component of the whole system for whole brain imaging of neural activity in freely swimming larval zebrafish. It is built up in C++. The tracking program will detect the fish and control the motion stage to compensate the motion of fish. With U-net based detection model and MPC control, our tracking system is highly reliable and can be used in a variety of behavioral experiments. The main program is [main.cpp](Track/main.cpp). Some codes for estimation of parameters are in [setting-parameters](setting-parameters). Some codes for labelling data to train the U-Net are in [labelling-data-for-DL](labelling-data-for-DL). 
+This tracking system for larval zebrafish is a component of the whole system for whole brain imaging of neural activity in freely swimming larval zebrafish. It is built up in C++. The tracking program will detect the fish and control the motion stage to compensate the motion of fish. With U-net based detection model and model predictive control (MPC), our tracking system is highly reliable and can be used in a variety of behavioral experiments. The main program is [main.cpp](Track/main.cpp). Some codes for estimation of parameters are in [setting-parameters](setting-parameters). Some codes for labelling data to train the U-Net are in [labelling-data-for-DL](labelling-data-for-DL). 
 
 ![pipeline](figs/pipeline.PNG)
 
@@ -20,7 +20,7 @@ We use a simple U-Net to detect fish head and yolk in real time. The codes for t
 <details>
 <summary> Motion stage control </summary>
 
-We adopted the model predictive control (MPC) method in [(1)](https://www.nature.com/articles/nmeth.4429) to control the X-Y motorized stage. We modeled the motion of the stage and the fsh, and then selected the optimal stage input by minimizing future tracking error. The main program of his part is [MPC_main.cpp](Track/MPC_main.cpp) which will call [MPC.cpp](Track/MPC.cpp).
+We adopted the model predictive control (MPC) method in [(1)](https://www.nature.com/articles/nmeth.4429) to control the X-Y motorized stage. We modeled the motion of the stage and the fsh, and then selected the optimal stage input by minimizing future tracking error. The main program of this part is [MPC_main.cpp](Track/MPC_main.cpp) which will call [MPC.cpp](Track/MPC.cpp).
 
 1. Kim, D. H., Kim, J., Marques, J. C., Grama, A., Hildebrand, D. G., Gu, W., Li, J. M., and Robson, D. N. Pan-neuronal calcium imaging with cellular resolution in freely swimming zebrafsh. *Nature methods*, 14(11):1107–1114, 2017.
 
