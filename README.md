@@ -13,7 +13,7 @@ This tracking system for larval zebrafish is a component of the whole system for
 <details>
 <summary> Detection of the fish </summary>
 
-We use a U-Net to detect fish in real time. The codes for training and the trained network are in [U-net](U-net). 
+We use a simple U-Net to detect fish head and yolk in real time. The codes for training and the trained network are in [U-net](U-net). 
 
 </details>
 
@@ -45,13 +45,18 @@ BitFlow AXN-PC2-CL-1xE
 
 <details>
 <summary> GPU </summary>
-
+NVIDIA GeForce RTX 3080
 </details>
 
 ## Dependency
 
 <details>
 <summary> Libraries </summary>
+TensorRT 7.2.2.3
+CUDA 11.1
+CUDNN 8.2.0
+OpenCV 4.55
+FLTK 1.4.0
 
 </details>
 
