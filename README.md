@@ -30,7 +30,7 @@ We adopted the model predictive control (MPC) method in [(1)](https://www.nature
 
 <details>
 <summary> Motorized stage </summary>
-×¿Á¢ºº¹âSK25A-65SR
+Zolix SK25A-65SR
 </details>
 
 <details>
@@ -57,6 +57,6 @@ A high-speed camera (0.8 ms exposure time, 340 fps, Basler aca2000-340kmNIR, Ger
 
 ## Contributors
 - [Daguang Li](https://github.com/Ali0Li) (`hrcs@mail.ustc.edu.cn`)
-- [Kexin Qi](https://github.com/kexin2016) (``)
+- [Kexin Qi](https://github.com/kexin2016) (`kexinqi@mail.ustc.edu.cn`)
 - [Guodong Tan](https://github.com/tagodong) (`tagodong@mail.ustc.edu.cn`)
 - [Quan Wen](https://github.com/wenquan) (`qwen@ustc.edu.cn`)
